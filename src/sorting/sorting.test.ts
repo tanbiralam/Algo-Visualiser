@@ -43,3 +43,12 @@ describe("replaySort", () => {
     expect(replaySort([2, 1], steps, 2)).toMatchObject({ array: [1, 2], swaps: 1 });
   });
 });
+
+describe("pseudocode trace", () => {
+  it.each(Object.entries(SORTING_ALGORITHMS))("%s steps point at real lines", (_, { run, pseudocode }) => {
+    for (const step of run(inputs[10])) {
+      expect(step.line).toBeGreaterThanOrEqual(0);
+      expect(step.line).toBeLessThan(pseudocode.length);
+    }
+  });
+});

@@ -5,6 +5,7 @@ import { GridType, TileType } from "../../../utils/types";
 
 export const bfs = (grid: GridType, startTile: TileType, endTile: TileType) => {
   const traversedTiles: TileType[] = [];
+  const frontier: number[] = []; // queue/stack size at each visit
   const base = grid[startTile.row][startTile.col];
   base.distance = 0;
   base.isTraversed = true;
@@ -17,6 +18,7 @@ export const bfs = (grid: GridType, startTile: TileType, endTile: TileType) => {
     if (tile.distance === Infinity) break;
     tile.isTraversed = true;
     traversedTiles.push(tile);
+    frontier.push(unTraversed.length);
     if (isEqual(tile, endTile)) break;
 
     const neighbors = getUntraversedNeighbors(grid, tile);
@@ -32,5 +34,5 @@ export const bfs = (grid: GridType, startTile: TileType, endTile: TileType) => {
 
   const path = buildPath(grid, endTile, traversedTiles);
 
-  return { traversedTiles, path };
+  return { traversedTiles, path, frontier };
 };

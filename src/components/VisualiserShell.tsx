@@ -45,7 +45,7 @@ export function VisualiserShell({
       </header>
       <main className="flex min-h-0 flex-1 flex-col lg:flex-row">
         <div className="relative flex min-h-[50vh] min-w-0 flex-1 p-4">{children}</div>
-        <aside className="w-full space-y-6 overflow-y-auto border-t border-white/10 p-4 text-sm lg:w-80 lg:border-l lg:border-t-0">
+        <aside className="w-full space-y-6 overflow-y-auto border-t border-white/10 p-4 text-sm lg:w-96 lg:border-l lg:border-t-0">
           {side}
         </aside>
       </main>

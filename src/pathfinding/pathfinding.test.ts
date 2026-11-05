@@ -4,11 +4,13 @@ import { bfs } from "./lib/algorithms/pathfinding/bfs";
 import { dfs } from "./lib/algorithms/pathfinding/dfs";
 import { dijkstra } from "./lib/algorithms/pathfinding/dijkstra";
 import { aStar } from "./lib/algorithms/pathfinding/aStar";
+import { runSearch } from "./search";
 import { createGrid } from "./utils/helpers";
 import {
   END_TILE_CONFIGURATION as END,
   MAX_COLS,
   MAX_ROWS,
+  PATHFINDING_ALGORITHMS,
   START_TILE_CONFIGURATION as START,
 } from "./utils/constants";
 import { GridType, TileType } from "./utils/types";
@@ -91,5 +93,20 @@ describe.each(Object.entries(algorithms))("%s", (name, run) => {
       walls[END.row + dr][END.col + dc] = true;
     }
     expect(run(gridFrom(walls), START, END).path).toEqual([]);
+  });
+});
+
+describe("runSearch trace", () => {
+  it("points every step at a real pseudocode line with live variables", () => {
+    for (const algorithm of ["BFS", "DFS", "DIJKSTRA", "A_STAR"] as const) {
+      const { steps } = runSearch(algorithm, cases[1], START, END);
+      const lines = PATHFINDING_ALGORITHMS[algorithm].pseudocode.length;
+      for (const step of steps) {
+        expect(step.line).toBeGreaterThanOrEqual(0);
+        expect(step.line).toBeLessThan(lines);
+        expect(Object.keys(step.vars).length).toBeGreaterThan(0);
+      }
+      expect(steps[0].vars[PATHFINDING_ALGORITHMS[algorithm].frontier]).toBeDefined();
+    }
   });
 });

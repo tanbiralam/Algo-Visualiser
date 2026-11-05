@@ -1,9 +1,9 @@
 import { SortAlgorithm, SortStep } from "../types";
-import { bubbleSort } from "./bubble";
-import { insertionSort } from "./insertion";
-import { mergeSort } from "./merge";
-import { quickSort } from "./quick";
-import { selectionSort } from "./selection";
+import { bubblePseudocode, bubbleSort } from "./bubble";
+import { insertionPseudocode, insertionSort } from "./insertion";
+import { mergePseudocode, mergeSort } from "./merge";
+import { quickPseudocode, quickSort } from "./quick";
+import { selectionPseudocode, selectionSort } from "./selection";
 
 type AlgorithmInfo = {
   label: string;
@@ -12,6 +12,7 @@ type AlgorithmInfo = {
   average: string;
   worst: string;
   run: (input: number[]) => SortStep[];
+  pseudocode: string[];
 };
 
 export const SORTING_ALGORITHMS: Record<SortAlgorithm, AlgorithmInfo> = {
@@ -23,6 +24,7 @@ export const SORTING_ALGORITHMS: Record<SortAlgorithm, AlgorithmInfo> = {
     average: "O(n²)",
     worst: "O(n²)",
     run: bubbleSort,
+    pseudocode: bubblePseudocode,
   },
   insertion: {
     label: "Insertion Sort",
@@ -32,6 +34,7 @@ export const SORTING_ALGORITHMS: Record<SortAlgorithm, AlgorithmInfo> = {
     average: "O(n²)",
     worst: "O(n²)",
     run: insertionSort,
+    pseudocode: insertionPseudocode,
   },
   selection: {
     label: "Selection Sort",
@@ -41,6 +44,7 @@ export const SORTING_ALGORITHMS: Record<SortAlgorithm, AlgorithmInfo> = {
     average: "O(n²)",
     worst: "O(n²)",
     run: selectionSort,
+    pseudocode: selectionPseudocode,
   },
   merge: {
     label: "Merge Sort",
@@ -50,6 +54,7 @@ export const SORTING_ALGORITHMS: Record<SortAlgorithm, AlgorithmInfo> = {
     average: "O(n log n)",
     worst: "O(n log n)",
     run: mergeSort,
+    pseudocode: mergePseudocode,
   },
   quick: {
     label: "Quick Sort",
@@ -59,6 +64,7 @@ export const SORTING_ALGORITHMS: Record<SortAlgorithm, AlgorithmInfo> = {
     average: "O(n log n)",
     worst: "O(n²)",
     run: quickSort,
+    pseudocode: quickPseudocode,
   },
 };
 

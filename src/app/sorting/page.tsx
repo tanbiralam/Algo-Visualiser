@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { BsShuffle } from "react-icons/bs";
 import { PlayerControls } from "@/components/PlayerControls";
+import { Pseudocode } from "@/components/Pseudocode";
 import { Select } from "@/components/Select";
 import { Button, Panel, VisualiserShell } from "@/components/VisualiserShell";
 import { usePlayer } from "@/engine/usePlayer";
@@ -45,6 +46,9 @@ export default function SortingPage() {
       }
       side={
         <>
+          <Panel title="Pseudocode">
+            <Pseudocode lines={info.pseudocode} trace={state.last} />
+          </Panel>
           <Panel title={info.label}>
             <p className="leading-relaxed text-gray-400">{info.description}</p>
           </Panel>

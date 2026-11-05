@@ -9,6 +9,7 @@ export const aStar = (
   endTile: TileType
 ) => {
   const traversedTiles = [];
+  const frontier: number[] = []; // queue/stack size at each visit
   const heuristicCost = initHeuristicCost(grid, endTile);
   const functionCost = initFunctionCost();
 
@@ -33,6 +34,7 @@ export const aStar = (
       if (currentTile.distance === Infinity) break;
       currentTile.isTraversed = true;
       traversedTiles.push(currentTile);
+      frontier.push(untraversedTiles.length);
       if (isEqual(currentTile, endTile)) break;
 
       const neighbors = getUntraversedNeighbors(grid, currentTile);
@@ -52,5 +54,5 @@ export const aStar = (
   }
 
   const path = buildPath(grid, endTile, traversedTiles);
-  return { traversedTiles, path };
+  return { traversedTiles, path, frontier };
 };

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { BsEraser } from "react-icons/bs";
 import { PlayerControls } from "@/components/PlayerControls";
+import { Pseudocode } from "@/components/Pseudocode";
 import { Select } from "@/components/Select";
 import { Button, Panel, VisualiserShell } from "@/components/VisualiserShell";
 import { usePlayer } from "@/engine/usePlayer";
@@ -91,6 +92,12 @@ export default function PathfindingPage() {
       }
       side={
         <>
+          <Panel title="Pseudocode">
+            <Pseudocode
+              lines={info.pseudocode}
+              trace={player.index > 0 ? search.steps[player.index - 1] : undefined}
+            />
+          </Panel>
           <Panel title={info.label}>
             <p className="leading-relaxed text-gray-400">{info.description}</p>
             <p className="mt-2 text-gray-500">
