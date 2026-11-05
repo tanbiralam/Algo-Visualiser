@@ -1,68 +1,52 @@
-# Sorting Visualiser
+# Algo Visualiser
 
-[Live Demo](https://sorting-visualiser-alpha-two.vercel.app)
+An interactive web app for seeing how classic algorithms work, built with Next.js, TypeScript and Tailwind CSS.
 
-Sorting Visualiser is an interactive web application for visualizing popular sorting algorithms. Built primarily with TypeScript and leveraging modern web technologies, this tool helps users understand how different sorting techniques operate step-by-step through engaging animations.
+## Visualisers
 
-## Features
+### Sorting (`/sorting`)
 
-- Visualizes common sorting algorithms (such as Bubble Sort, Selection Sort, etc.)
-- Interactive controls to adjust array size and sorting speed
-- Real-time animations to demonstrate sorting logic
-- Clean, responsive UI built with Tailwind CSS and Next.js
+- Algorithms: Bubble, Insertion, Selection, Merge and Quick sort
+- Adjustable animation speed
+- Description and time complexity (best / average / worst) for each algorithm
 
-## Tech Stack
+### Pathfinding (`/pathfinding`)
 
-- **TypeScript** (96.9%)
-- **CSS** (2.2%)
-- **JavaScript** (0.9%)
-- Next.js
-- Tailwind CSS
+- Algorithms: Breadth-First Search, Depth-First Search, Dijkstra and A*
+- Click and drag on the grid to draw walls
+- Maze generators: Binary Tree and Recursive Division
+- Three animation speeds
 
-## Getting Started
+## Getting started
 
-### Prerequisites
-
-- Node.js (v16 or higher recommended)
-- npm or yarn
-
-### Installation
+Requires Node.js 18.17 or newer.
 
 ```bash
-git clone https://github.com/tanbiralam/Sorting-Visualiser.git
-cd Sorting-Visualiser
 npm install
-# or
-yarn install
-```
-
-### Running Locally
-
-```bash
 npm run dev
-# or
-yarn dev
 ```
 
-Visit [http://localhost:3000](http://localhost:3000) to view the app in your browser.
+Then open [http://localhost:3000](http://localhost:3000).
 
-## Project Structure
+| Command         | What it does                 |
+| --------------- | ---------------------------- |
+| `npm run dev`   | Start the dev server         |
+| `npm run build` | Production build             |
+| `npm start`     | Serve the production build   |
+| `npm run lint`  | Run ESLint                   |
 
-- **/src**: Main source code for components, pages, and logic
-- **package.json**: Project dependencies and scripts
-- **next.config.mjs**: Next.js configuration
-- **tailwind.config.ts**: Tailwind CSS configuration
-- **tsconfig.json**: TypeScript configuration
-- **.eslintrc.json**: Linting configuration
+## Project structure
 
-## Contributing
-
-Contributions are welcome! Please open an issue or submit a pull request for improvements or bug fixes.
-
-## License
-
-This project currently does not specify a license.
+```
+src/
+  app/
+    page.tsx              # landing page
+    sorting/              # /sorting route
+    pathfinding/          # /pathfinding route
+  sorting/                # sorting algorithms, context, inputs
+  pathfinding/            # pathfinding + maze algorithms, grid, context
+```
 
 ## Author
 
-- [tanbiralam](https://github.com/tanbiralam)
+[tanbiralam](https://github.com/tanbiralam)
