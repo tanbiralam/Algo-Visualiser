@@ -1,14 +1,14 @@
 import { MAX_COLS, MAX_ROWS } from "./constants";
-import { GridType, TileType } from "./types";
+import { GridType, Point } from "./types";
 
-const retriveHeuristicCost = (currentTile: TileType, endTile: TileType) => {
+const retriveHeuristicCost = (currentTile: Point, endTile: Point) => {
   const manhattanDistance = 1;
   const row = Math.abs(currentTile.row - endTile.row);
   const col = Math.abs(currentTile.col - endTile.col);
   return manhattanDistance * (row + col);
 };
 
-export const initHeuristicCost = (grid: GridType, endTile: TileType) => {
+export const initHeuristicCost = (grid: GridType, endTile: Point) => {
   const heuristicCost = [];
   for (let i = 0; i < MAX_ROWS; i++) {
     const row = [];

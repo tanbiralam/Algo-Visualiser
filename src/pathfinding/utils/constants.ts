@@ -1,30 +1,16 @@
-import { AlgorithmType, MazeType } from "./types";
+import { AlgorithmType, MazeType, Point } from "./types";
 
 export const MAX_ROWS = 39;
 export const MAX_COLS = 49;
 
-export const START_TILE_CONFIGURATION = {
-  row: 1,
-  col: 1,
-  isEnd: false,
-  isWall: false,
-  isPath: false,
-  distance: 0,
-  isStart: false,
-  isTraversed: false,
-  parent: null,
-};
-export const END_TILE_CONFIGURATION = {
-  row: MAX_ROWS - 2,
-  col: MAX_COLS - 2,
-  isEnd: false,
-  isWall: false,
-  isPath: false,
-  distance: 0,
-  isStart: false,
-  isTraversed: false,
-  parent: null,
-};
+export const DEFAULT_START: Point = { row: 1, col: 1 };
+export const DEFAULT_END: Point = { row: MAX_ROWS - 2, col: MAX_COLS - 2 };
+
+// Board cell values.
+export const EMPTY = 0;
+export const WALL = 1;
+export const WEIGHT = 2;
+export const WEIGHT_COST = 5; // stepping onto a weight tile costs 5 instead of 1
 
 // Tiles are CSS grid cells; size comes from the grid, the 1px gaps draw the lines.
 export const TILE_STYLE = "bg-[#0a0a0a]";
@@ -33,22 +19,27 @@ export const START_TILE_STYLE = "bg-green-500";
 export const END_TILE_STYLE = "bg-red-600";
 export const WALL_TILE_STYLE = "bg-gray-200 animate-wall";
 export const PATH_TILE_STYLE = "bg-amber-300 animate-path";
+export const WEIGHT_TILE_STYLE = "bg-purple-700";
+export const WEIGHT_TRAVERSED_TILE_STYLE = "bg-cyan-800 animate-traversed";
+export const WEIGHT_PATH_TILE_STYLE = "bg-amber-600 animate-path";
 
 export const MAZE_OPTIONS: { value: MazeType; label: string }[] = [
   { value: "NONE", label: "No maze" },
   { value: "BINARY_TREE", label: "Binary Tree" },
   { value: "RECURSIVE_DIVISION", label: "Recursive Division" },
+  { value: "BACKTRACKER", label: "Recursive Backtracker" },
+  { value: "PRIM", label: "Prim's" },
 ];
 
 export const PATHFINDING_ALGORITHMS: Record<
   AlgorithmType,
-  { label: string; description: string; shortest: boolean; frontier: string; pseudocode: string[] }
+  { label: string; description: string; guarantee: string; frontier: string; pseudocode: string[] }
 > = {
   BFS: {
     label: "Breadth-First Search",
     description:
-      "Explores the grid in rings of equal distance from the start using a queue. On an unweighted grid the first time it reaches the end is along a shortest path.",
-    shortest: true,
+      "Explores the grid in rings of equal distance from the start using a queue. It reaches the end along a path with the fewest moves, but treats weight tiles like any other tile.",
+    guarantee: "fewest moves; ignores weights",
     frontier: "queue size",
     pseudocode: [
       "queue = [start]",
@@ -63,8 +54,8 @@ export const PATHFINDING_ALGORITHMS: Record<
   DFS: {
     label: "Depth-First Search",
     description:
-      "Follows one direction as far as possible using a stack before backtracking. Finds a path if one exists, but usually not the shortest.",
-    shortest: false,
+      "Follows one direction as far as possible using a stack before backtracking. Finds a path if one exists, but usually not the shortest, and ignores weights.",
+    guarantee: "none: any path it finds",
     frontier: "stack size",
     pseudocode: [
       "stack = [start]",
@@ -79,8 +70,8 @@ export const PATHFINDING_ALGORITHMS: Record<
   DIJKSTRA: {
     label: "Dijkstra",
     description:
-      "Always expands the closest unvisited tile from a priority queue. Guarantees a shortest path, and also works when moves have different costs.",
-    shortest: true,
+      "Always expands the closest unvisited tile from a priority queue. Each move costs the weight of the tile entered, so it finds the cheapest path and routes around weight tiles when that is cheaper.",
+    guarantee: "cheapest path",
     frontier: "queue size",
     pseudocode: [
       "dist[start] = 0; pq = [start]",
@@ -88,7 +79,7 @@ export const PATHFINDING_ALGORITHMS: Record<
       "  tile = pq.popMin(dist); mark visited",
       "  if tile == end: break",
       "  for each unvisited neighbour n of tile",
-      "    if dist[tile] + 1 < dist[n]: update n",
+      "    if dist[tile] + w(n) < dist[n]: update n",
       "path = follow parents back from end",
     ],
   },
@@ -96,7 +87,7 @@ export const PATHFINDING_ALGORITHMS: Record<
     label: "A* Search",
     description:
       "Like Dijkstra, but ranks tiles by distance so far plus a Manhattan-distance estimate to the end, so it heads toward the goal and visits far fewer tiles.",
-    shortest: true,
+    guarantee: "cheapest path",
     frontier: "open set size",
     pseudocode: [
       "g[start] = 0; open = [start]",
@@ -104,7 +95,7 @@ export const PATHFINDING_ALGORITHMS: Record<
       "  tile = open.popMin(f = g + h); mark visited",
       "  if tile == end: break",
       "  for each unvisited neighbour n of tile",
-      "    if g[tile] + 1 < g[n]: update n",
+      "    if g[tile] + w(n) < g[n]: update n",
       "path = follow parents back from end",
     ],
   },

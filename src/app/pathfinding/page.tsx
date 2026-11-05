@@ -1,6 +1,5 @@
 "use client";
 
-import { formatNumber, useHydrated } from "@/lib/format";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { BsEraser } from "react-icons/bs";
 import { PlayerControls } from "@/components/PlayerControls";
@@ -9,27 +8,36 @@ import { Stats } from "@/components/Stats";
 import { Select } from "@/components/Select";
 import { Button, Pane, Panel, VisualiserShell } from "@/components/VisualiserShell";
 import { usePlayer } from "@/engine/usePlayer";
+import { formatNumber, useHydrated } from "@/lib/format";
 import { createRandom, newSeed } from "@/lib/random";
-import { Grid } from "@/pathfinding/Grid";
-import { applyOps, emptyWalls, MAZE_GENERATORS, WallOp } from "@/pathfinding/mazes";
+import { Endpoint, Grid } from "@/pathfinding/Grid";
+import { applyOps, emptyBoard, MAZE_GENERATORS, snapToCell, WallOp } from "@/pathfinding/mazes";
 import { replaySearch, runSearch } from "@/pathfinding/search";
 import {
   ALGORITHM_OPTIONS,
-  END_TILE_CONFIGURATION as END,
+  DEFAULT_END,
+  DEFAULT_START,
   MAZE_OPTIONS,
   PATHFINDING_ALGORITHMS,
-  START_TILE_CONFIGURATION as START,
+  WALL,
+  WEIGHT,
+  WEIGHT_COST,
 } from "@/pathfinding/utils/constants";
-import { AlgorithmType, MazeType } from "@/pathfinding/utils/types";
+import { AlgorithmType, MazeType, Point } from "@/pathfinding/utils/types";
 
 const COMPARE_OPTIONS = [{ value: "none" as const, label: "Nothing" }, ...ALGORITHM_OPTIONS];
 const EMPTY_STATUS = replaySearch([], 0);
 const MAZE_FRAMES = 120; // a maze draws in about two seconds
+const BRUSH_OPTIONS = [
+  { value: "wall", label: "Wall" },
+  { value: "weight", label: `Weight (cost ${WEIGHT_COST})` },
+] as const;
 
 const LEGEND = [
   ["bg-green-500", "Start"],
   ["bg-red-600", "End"],
   ["bg-gray-200", "Wall"],
+  ["bg-purple-700", `Weight: costs ${WEIGHT_COST} to enter`],
   ["bg-cyan-500", "Visited"],
   ["bg-amber-300", "Path"],
 ] as const;
@@ -38,7 +46,10 @@ export default function PathfindingPage() {
   const [algorithm, setAlgorithm] = useState<AlgorithmType>("BFS");
   const [rival, setRival] = useState<AlgorithmType | "none">("none");
   const [maze, setMaze] = useState<MazeType>("NONE");
-  const [walls, setWalls] = useState(emptyWalls);
+  const [board, setBoard] = useState(emptyBoard);
+  const [brush, setBrush] = useState<"wall" | "weight">("wall");
+  const [start, setStart] = useState<Point>(DEFAULT_START);
+  const [end, setEnd] = useState<Point>(DEFAULT_END);
   const [mazeOps, setMazeOps] = useState<WallOp[] | null>(null);
   const drawingMaze = mazeOps !== null;
 
@@ -49,7 +60,7 @@ export default function PathfindingPage() {
     let i = 0;
     const tick = () => {
       const chunk = mazeOps.slice(i, (i += perFrame));
-      setWalls((w) => applyOps(w, chunk));
+      setBoard((b) => applyOps(b, chunk));
       if (i < mazeOps.length) raf = requestAnimationFrame(tick);
       else setMazeOps(null);
     };
@@ -63,9 +74,9 @@ export default function PathfindingPage() {
         ? []
         : (rival === "none" ? [algorithm] : [algorithm, rival]).map((key) => ({
             info: PATHFINDING_ALGORITHMS[key],
-            search: runSearch(key, walls, START, END),
+            search: runSearch(key, board, start, end),
           })),
-    [algorithm, rival, walls, drawingMaze]
+    [algorithm, rival, board, start, end, drawingMaze]
   );
   const player = usePlayer(Math.max(0, ...runs.map((r) => r.search.steps.length)), runs);
   const statuses = useMemo(
@@ -79,18 +90,28 @@ export default function PathfindingPage() {
 
   const generateMaze = (value: MazeType) => {
     setMaze(value);
-    setWalls(emptyWalls());
-    setMazeOps(value === "NONE" ? null : MAZE_GENERATORS[value](createRandom(newSeed()), START, END));
+    setBoard(emptyBoard());
+    if (value === "NONE") return setMazeOps(null);
+    // Mazes connect odd rows/cols only, so move the endpoints onto those first.
+    let [s, e] = [snapToCell(start), snapToCell(end)];
+    if (s.row === e.row && s.col === e.col) [s, e] = [DEFAULT_START, DEFAULT_END];
+    setStart(s);
+    setEnd(e);
+    setMazeOps(MAZE_GENERATORS[value](createRandom(newSeed()), s, e));
   };
 
-  const paint = useCallback((row: number, col: number, wall: boolean) => {
-    setWalls((w) => {
-      if (w[row][col] === wall) return w;
-      const next = w.slice();
-      next[row] = w[row].slice();
-      next[row][col] = wall;
+  const paint = useCallback((row: number, col: number, value: number) => {
+    setBoard((b) => {
+      if (b[row][col] === value) return b;
+      const next = b.slice();
+      next[row] = b[row].slice();
+      next[row][col] = value;
       return next;
     });
+  }, []);
+
+  const moveEndpoint = useCallback((endpoint: Endpoint, to: Point) => {
+    (endpoint === "start" ? setStart : setEnd)(to);
   }, []);
 
   return (
@@ -101,8 +122,9 @@ export default function PathfindingPage() {
           <Select label="Maze" value={maze} options={MAZE_OPTIONS} onChange={generateMaze} disabled={locked} />
           <Select label="Algorithm" value={algorithm} options={ALGORITHM_OPTIONS} onChange={setAlgorithm} disabled={locked} />
           <Select label="Compare with" value={rival} options={COMPARE_OPTIONS} onChange={setRival} disabled={locked} />
+          <Select label="Brush" value={brush} options={BRUSH_OPTIONS} onChange={setBrush} disabled={locked} />
           <Button onClick={() => generateMaze("NONE")} disabled={locked}>
-            <BsEraser /> Clear walls
+            <BsEraser /> Clear board
           </Button>
         </>
       }
@@ -119,6 +141,7 @@ export default function PathfindingPage() {
                       value: Math.max(0, Math.min(player.index, search.steps.length) - search.visited),
                       total: search.found ? search.pathLength : "no path",
                     },
+                    { label: "Path cost", value: search.found ? search.cost : "–" },
                     { label: "Search time", value: hydrated ? `${search.ms.toFixed(2)} ms` : "–" },
                   ]}
                 />
@@ -132,13 +155,13 @@ export default function PathfindingPage() {
           {!comparing && <Panel title={info.label}>
             <p className="leading-relaxed text-gray-400">{info.description}</p>
             <p className="mt-2 text-gray-500">
-              Shortest path guaranteed: <span className="text-gray-300">{info.shortest ? "yes" : "no"}</span>
+              Guarantees: <span className="text-gray-300">{info.guarantee}</span>
             </p>
           </Panel>}
           <Panel title="How to use">
             <p className="leading-relaxed text-gray-400">
-              Click and drag on the grid to draw or erase walls, or pick a maze. Press play (space) to run the
-              search, and use ← / → to step through it.
+              Click and drag to paint walls or weights (pick the brush), or generate a maze. Drag the green and
+              red tiles to move the start and end. Press play (space) to run, and ← / → to step.
             </p>
           </Panel>
           <Panel title="Legend">
@@ -166,11 +189,13 @@ export default function PathfindingPage() {
               status={run && (finished ? (run.search.found ? "reached the end" : "no path") : `${formatNumber(run.search.visited)} visits`)}
             >
               <Grid
-                walls={walls}
+                board={board}
                 status={statuses[k] ?? EMPTY_STATUS}
-                start={START}
-                end={END}
+                start={start}
+                end={end}
+                brush={brush === "wall" ? WALL : WEIGHT}
                 onPaint={locked ? undefined : paint}
+                onMoveEndpoint={moveEndpoint}
               />
               {finished && !run?.search.found && (
                 <p className="absolute left-1/2 top-2 -translate-x-1/2 rounded-md bg-red-500/15 px-3 py-1 text-sm text-red-300">

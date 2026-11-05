@@ -1,11 +1,11 @@
 import { getUntraversedNeighbors } from "../../../utils/getUntraversedNeighbors";
 import { buildPath, dropFromQueue, isEqual } from "../../../utils/helpers";
-import { GridType, TileType } from "../../../utils/types";
+import { GridType, Point } from "../../../utils/types";
 
 export const dijkstra = (
   grid: GridType,
-  startTile: TileType,
-  endTile: TileType
+  startTile: Point,
+  endTile: Point
 ) => {
   const traversedTiles = [];
   const frontier: number[] = []; // queue/stack size at each visit
@@ -26,9 +26,10 @@ export const dijkstra = (
       if (isEqual(currentTile, endTile)) break;
       const neighbors = getUntraversedNeighbors(grid, currentTile);
       for (let i = 0; i < neighbors.length; i += 1) {
-        if (currentTile.distance + 1 < neighbors[i].distance) {
+        const distance = currentTile.distance + neighbors[i].weight;
+        if (distance < neighbors[i].distance) {
           dropFromQueue(neighbors[i], untraversedTiles);
-          neighbors[i].distance = currentTile.distance + 1;
+          neighbors[i].distance = distance;
           neighbors[i].parent = currentTile;
           untraversedTiles.push(neighbors[i]);
         }

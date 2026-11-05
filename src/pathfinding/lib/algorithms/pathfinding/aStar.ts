@@ -1,12 +1,12 @@
 import { getUntraversedNeighbors } from "../../../utils/getUntraversedNeighbors";
 import { buildPath, dropFromQueue, isEqual } from "../../../utils/helpers";
 import { initFunctionCost, initHeuristicCost } from "../../../utils/heuristics";
-import { GridType, TileType } from "../../../utils/types";
+import { GridType, Point } from "../../../utils/types";
 
 export const aStar = (
   grid: GridType,
-  startTile: TileType,
-  endTile: TileType
+  startTile: Point,
+  endTile: Point
 ) => {
   const traversedTiles = [];
   const frontier: number[] = []; // queue/stack size at each visit
@@ -39,7 +39,7 @@ export const aStar = (
 
       const neighbors = getUntraversedNeighbors(grid, currentTile);
       for (let i = 0; i < neighbors.length; i++) {
-        const distanceToNeighbor = currentTile.distance + 1;
+        const distanceToNeighbor = currentTile.distance + neighbors[i].weight;
         if (distanceToNeighbor < neighbors[i].distance) {
           dropFromQueue(neighbors[i], untraversedTiles);
           neighbors[i].distance = distanceToNeighbor;

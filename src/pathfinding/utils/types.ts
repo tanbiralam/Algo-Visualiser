@@ -1,6 +1,8 @@
 export type AlgorithmType = "DIJKSTRA" | "A_STAR" | "BFS" | "DFS";
 
-export type MazeType = "NONE" | "BINARY_TREE" | "RECURSIVE_DIVISION";
+export type MazeType = "NONE" | "BINARY_TREE" | "RECURSIVE_DIVISION" | "BACKTRACKER" | "PRIM";
+
+export type Point = { row: number; col: number };
 
 export type TileType = {
   row: number;
@@ -9,6 +11,7 @@ export type TileType = {
   isWall: boolean;
   isPath: boolean;
   distance: number;
+  weight: number; // cost of stepping onto this tile
   isTraversed: boolean;
   isStart: boolean;
   parent: TileType | null;

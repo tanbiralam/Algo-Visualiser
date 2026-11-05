@@ -1,24 +1,29 @@
+import { Trace } from "@/engine/types";
 import { aStar } from "./lib/algorithms/pathfinding/aStar";
 import { bfs } from "./lib/algorithms/pathfinding/bfs";
 import { dfs } from "./lib/algorithms/pathfinding/dfs";
 import { dijkstra } from "./lib/algorithms/pathfinding/dijkstra";
-import { Trace } from "@/engine/types";
-import { MAX_COLS, MAX_ROWS, PATHFINDING_ALGORITHMS } from "./utils/constants";
+import { MAX_COLS, MAX_ROWS, PATHFINDING_ALGORITHMS, WALL, WEIGHT, WEIGHT_COST } from "./utils/constants";
 import { createGrid, isEqual } from "./utils/helpers";
-import { AlgorithmType, TileType } from "./utils/types";
+import { AlgorithmType, Point, TileType } from "./utils/types";
 
-export type Walls = boolean[][];
-export type Point = { row: number; col: number };
+/** Board[row][col] is EMPTY, WALL or WEIGHT. */
+export type Board = number[][];
 export type SearchStep = Trace & { type: "visit" | "path"; row: number; col: number };
+export type SearchResult = ReturnType<typeof runSearch>;
 
 const ALGORITHMS = { BFS: bfs, DFS: dfs, DIJKSTRA: dijkstra, A_STAR: aStar };
-
 const PATH_LINE = 6; // last pseudocode line: follow parents back
 
 /** Runs a search on a fresh grid and flattens it into playable, traced steps. */
-export function runSearch(algorithm: AlgorithmType, walls: Walls, start: TileType, end: TileType) {
+export function runSearch(algorithm: AlgorithmType, board: Board, start: Point, end: Point) {
   const grid = createGrid(start, end);
-  grid.forEach((row, r) => row.forEach((tile, c) => (tile.isWall = walls[r][c])));
+  grid.forEach((row, r) =>
+    row.forEach((tile, c) => {
+      tile.isWall = board[r][c] === WALL;
+      tile.weight = board[r][c] === WEIGHT ? WEIGHT_COST : 1;
+    })
+  );
   const startedAt = performance.now();
   const { traversedTiles, path, frontier } = ALGORITHMS[algorithm](grid, start, end);
   const ms = performance.now() - startedAt;
@@ -49,7 +54,9 @@ export function runSearch(algorithm: AlgorithmType, walls: Walls, start: TileTyp
       vars: { tile: `(${tile.row}, ${tile.col})`, "path length": `${k + 1} / ${path.length}` },
     })),
   ];
-  return { steps, visited: traversedTiles.length, pathLength: path.length, found: path.length > 0, ms };
+  // Cost of a path = sum of the weights of every tile entered after the start.
+  const cost = path.slice(1).reduce((sum, tile) => sum + tile.weight, 0);
+  return { steps, visited: traversedTiles.length, pathLength: path.length, cost, found: path.length > 0, ms };
 }
 
 export const VISITED = 1;

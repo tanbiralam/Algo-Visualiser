@@ -1,8 +1,8 @@
 import { getUntraversedNeighbors } from "../../../utils/getUntraversedNeighbors";
 import { buildPath, checkStack, isEqual } from "../../../utils/helpers";
-import { GridType, TileType } from "../../../utils/types";
+import { GridType, Point } from "../../../utils/types";
 
-export const dfs = (grid: GridType, startTile: TileType, endTile: TileType) => {
+export const dfs = (grid: GridType, startTile: Point, endTile: Point) => {
   const traversedTiles = [];
   const frontier: number[] = []; // queue/stack size at each visit
   const base = grid[startTile.row][startTile.col];

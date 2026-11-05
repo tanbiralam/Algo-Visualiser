@@ -1,8 +1,8 @@
 import { MAX_COLS, MAX_ROWS } from "./constants";
-import { GridType, TileType } from "./types";
+import { GridType, Point, TileType } from "./types";
 
-const createRow = (row: number, startTile: TileType, endTile: TileType) => {
-  const currentRow = [];
+const createRow = (row: number, startTile: Point, endTile: Point) => {
+  const currentRow: TileType[] = [];
   for (let col = 0; col < MAX_COLS; col++) {
     currentRow.push({
       row,
@@ -11,6 +11,7 @@ const createRow = (row: number, startTile: TileType, endTile: TileType) => {
       isWall: false,
       isPath: false,
       distance: Infinity,
+      weight: 1,
       isStart: row === startTile.row && col === startTile.col,
       isTraversed: false,
       parent: null,
@@ -19,7 +20,7 @@ const createRow = (row: number, startTile: TileType, endTile: TileType) => {
   return currentRow;
 };
 
-export const createGrid = (startTile: TileType, endTile: TileType) => {
+export const createGrid = (startTile: Point, endTile: Point) => {
   const grid: GridType = [];
   for (let row = 0; row < MAX_ROWS; row++) {
     grid.push(createRow(row, startTile, endTile));
@@ -29,7 +30,7 @@ export const createGrid = (startTile: TileType, endTile: TileType) => {
 
 export const buildPath = (
   grid: GridType,
-  endTile: TileType,
+  endTile: Point,
   traversedTiles: TileType[]
 ) => {
   const path: TileType[] = [];
@@ -45,7 +46,7 @@ export const buildPath = (
   return path;
 };
 
-export const isEqual = (a: TileType, b: TileType) => {
+export const isEqual = (a: Point, b: Point) => {
   return a.row === b.row && a.col === b.col;
 };
 

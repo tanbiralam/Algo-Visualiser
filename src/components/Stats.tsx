@@ -5,7 +5,7 @@ export type Stat = { label: string; value: number | string; total?: number | str
 /** Counters for the current step; `total` shows the final value once the run completes. */
 export function Stats({ stats }: { stats: Stat[] }) {
   return (
-    <dl className="grid grid-cols-3 gap-2">
+    <dl className={`grid gap-2 ${stats.length === 4 ? "grid-cols-2" : "grid-cols-3"}`}>
       {stats.map(({ label, value, total }) => (
         <div key={label} className="rounded-md bg-white/5 px-3 py-2">
           <dt className="text-[11px] uppercase tracking-wide text-gray-500">{label}</dt>

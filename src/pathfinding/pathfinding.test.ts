@@ -1,105 +1,128 @@
 import { describe, expect, it } from "vitest";
-import { createRandom } from "@/lib/random";
-import { bfs } from "./lib/algorithms/pathfinding/bfs";
-import { dfs } from "./lib/algorithms/pathfinding/dfs";
-import { dijkstra } from "./lib/algorithms/pathfinding/dijkstra";
-import { aStar } from "./lib/algorithms/pathfinding/aStar";
-import { runSearch } from "./search";
-import { createGrid } from "./utils/helpers";
+import { createRandom, randomInt } from "@/lib/random";
+import { Board, runSearch } from "./search";
 import {
-  END_TILE_CONFIGURATION as END,
+  EMPTY,
   MAX_COLS,
   MAX_ROWS,
   PATHFINDING_ALGORITHMS,
-  START_TILE_CONFIGURATION as START,
+  WALL,
+  WEIGHT,
+  WEIGHT_COST,
 } from "./utils/constants";
-import { GridType, TileType } from "./utils/types";
+import { AlgorithmType, Point } from "./utils/types";
 
-type Walls = boolean[][];
+type Case = { board: Board; start: Point; end: Point };
+const DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+const cost = (board: Board, p: Point) => (board[p.row][p.col] === WEIGHT ? WEIGHT_COST : 1);
 
-function randomWalls(rand: () => number, density: number): Walls {
-  return Array.from({ length: MAX_ROWS }, (_, r) =>
-    Array.from(
-      { length: MAX_COLS },
-      (_, c) =>
-        !(r === START.row && c === START.col) &&
-        !(r === END.row && c === END.col) &&
-        rand() < density
-    )
+function randomCase(rand: () => number, wallDensity: number, weightDensity: number): Case {
+  const point = () => ({ row: randomInt(rand, 0, MAX_ROWS - 1), col: randomInt(rand, 0, MAX_COLS - 1) });
+  const start = point();
+  let end = point();
+  while (end.row === start.row && end.col === start.col) end = point();
+  const board = Array.from({ length: MAX_ROWS }, (_, r) =>
+    Array.from({ length: MAX_COLS }, (_, c) => {
+      if ((r === start.row && c === start.col) || (r === end.row && c === end.col)) return EMPTY;
+      const x = rand();
+      return x < wallDensity ? WALL : x < wallDensity + weightDensity ? WEIGHT : EMPTY;
+    })
   );
+  return { board, start, end };
 }
 
-function gridFrom(walls: Walls): GridType {
-  const grid = createGrid(START, END);
-  grid.forEach((row, r) => row.forEach((tile, c) => (tile.isWall = walls[r][c])));
-  return grid;
-}
-
-// Independent BFS: shortest number of moves from start to end, or -1.
-function shortestDistance(walls: Walls) {
-  const dist = walls.map((row) => row.map(() => -1));
-  dist[START.row][START.col] = 0;
-  const queue = [[START.row, START.col]];
-  for (let head = 0; head < queue.length; head++) {
-    const [r, c] = queue[head];
-    for (const [dr, dc] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-      const nr = r + dr;
-      const nc = c + dc;
-      if (nr < 0 || nr >= MAX_ROWS || nc < 0 || nc >= MAX_COLS) continue;
-      if (walls[nr][nc] || dist[nr][nc] >= 0) continue;
-      dist[nr][nc] = dist[r][c] + 1;
-      queue.push([nr, nc]);
+// Independent reference: Dijkstra over move costs. With unit costs this is plain BFS.
+function cheapest({ board, start, end }: Case, unitCost: boolean) {
+  const dist = board.map((row) => row.map(() => Infinity));
+  dist[start.row][start.col] = 0;
+  const done = board.map((row) => row.map(() => false));
+  for (;;) {
+    let best: Point | null = null;
+    for (let r = 0; r < MAX_ROWS; r++)
+      for (let c = 0; c < MAX_COLS; c++)
+        if (!done[r][c] && dist[r][c] < Infinity && (!best || dist[r][c] < dist[best.row][best.col]))
+          best = { row: r, col: c };
+    if (!best) return Infinity;
+    if (best.row === end.row && best.col === end.col) return dist[best.row][best.col];
+    done[best.row][best.col] = true;
+    for (const [dr, dc] of DIRS) {
+      const n = { row: best.row + dr, col: best.col + dc };
+      if (n.row < 0 || n.row >= MAX_ROWS || n.col < 0 || n.col >= MAX_COLS) continue;
+      if (board[n.row][n.col] === WALL) continue;
+      const d = dist[best.row][best.col] + (unitCost ? 1 : cost(board, n));
+      if (d < dist[n.row][n.col]) dist[n.row][n.col] = d;
     }
   }
-  return dist[END.row][END.col];
 }
 
-function expectValidPath(path: TileType[]) {
-  expect(path[0]).toMatchObject({ row: START.row, col: START.col });
-  expect(path[path.length - 1]).toMatchObject({ row: END.row, col: END.col });
-  path.forEach((tile, k) => {
-    expect(tile.isWall).toBe(false);
-    if (k === 0) return;
-    const prev = path[k - 1];
-    expect(Math.abs(tile.row - prev.row) + Math.abs(tile.col - prev.col)).toBe(1);
+function expectValidPath({ board, start, end }: Case, path: Point[]) {
+  expect(path[0]).toEqual(start);
+  expect(path[path.length - 1]).toEqual(end);
+  path.forEach((p, k) => {
+    expect(board[p.row][p.col]).not.toBe(WALL);
+    if (k) expect(Math.abs(p.row - path[k - 1].row) + Math.abs(p.col - path[k - 1].col)).toBe(1);
   });
 }
 
 const rand = createRandom(7);
-const cases = Array.from({ length: 80 }, (_, k) =>
-  randomWalls(rand, [0, 0.2, 0.3, 0.45][k % 4])
+const cases = Array.from({ length: 40 }, (_, k) =>
+  randomCase(rand, [0, 0.2, 0.3, 0.45][k % 4], [0, 0.15, 0.3][k % 3])
 );
+const ALGORITHMS: AlgorithmType[] = ["BFS", "DFS", "DIJKSTRA", "A_STAR"];
 
-const algorithms = { bfs, dfs, dijkstra, aStar };
-const shortest = new Set(["bfs", "dijkstra", "aStar"]);
-
-describe.each(Object.entries(algorithms))("%s", (name, run) => {
-  it(shortest.has(name) ? "finds a shortest path" : "finds a valid path", () => {
-    for (const walls of cases) {
-      const expected = shortestDistance(walls);
-      const { path } = run(gridFrom(walls), START, END);
-      if (expected < 0) {
-        expect(path).toEqual([]);
-        continue;
-      }
-      expectValidPath(path);
-      if (shortest.has(name)) expect(path.length - 1).toBe(expected);
+describe.each(ALGORITHMS)("%s", (algorithm) => {
+  it("finds a valid path exactly when the end is reachable", () => {
+    for (const c of cases) {
+      const result = runSearch(algorithm, c.board, c.start, c.end);
+      const path = result.steps.filter((s) => s.type === "path").map(({ row, col }) => ({ row, col }));
+      expect(result.found).toBe(cheapest(c, true) < Infinity);
+      if (result.found) expectValidPath(c, path);
+      else expect(path).toEqual([]);
     }
   });
 
-  it("returns an empty path when the end is walled off", () => {
-    const walls = randomWalls(createRandom(1), 0);
-    for (const [dr, dc] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-      walls[END.row + dr][END.col + dc] = true;
+  it("returns no path when the end is walled off", () => {
+    const c = randomCase(createRandom(1), 0, 0);
+    for (const [dr, dc] of DIRS) {
+      const r = c.end.row + dr;
+      const col = c.end.col + dc;
+      if (r >= 0 && r < MAX_ROWS && col >= 0 && col < MAX_COLS && !(r === c.start.row && col === c.start.col))
+        c.board[r][col] = WALL;
     }
-    expect(run(gridFrom(walls), START, END).path).toEqual([]);
+    const startNextToEnd = Math.abs(c.start.row - c.end.row) + Math.abs(c.start.col - c.end.col) === 1;
+    expect(runSearch(algorithm, c.board, c.start, c.end).found).toBe(startNextToEnd);
+  });
+});
+
+describe("optimality", () => {
+  it("BFS finds the fewest moves, ignoring weights", () => {
+    for (const c of cases) {
+      const result = runSearch("BFS", c.board, c.start, c.end);
+      if (result.found) expect(result.pathLength - 1).toBe(cheapest(c, true));
+    }
+  });
+
+  it.each(["DIJKSTRA", "A_STAR"] as const)("%s finds the cheapest path through weights", (algorithm) => {
+    for (const c of cases) {
+      const result = runSearch(algorithm, c.board, c.start, c.end);
+      if (result.found) expect(result.cost).toBe(cheapest(c, false));
+    }
+  });
+
+  it("weights make Dijkstra differ from BFS", () => {
+    const differs = cases.some((c) => {
+      const bfs = runSearch("BFS", c.board, c.start, c.end);
+      const dijkstra = runSearch("DIJKSTRA", c.board, c.start, c.end);
+      return bfs.found && dijkstra.cost < bfs.cost;
+    });
+    expect(differs).toBe(true);
   });
 });
 
 describe("runSearch trace", () => {
   it("points every step at a real pseudocode line with live variables", () => {
-    for (const algorithm of ["BFS", "DFS", "DIJKSTRA", "A_STAR"] as const) {
-      const { steps } = runSearch(algorithm, cases[1], START, END);
+    for (const algorithm of ALGORITHMS) {
+      const { steps } = runSearch(algorithm, cases[1].board, cases[1].start, cases[1].end);
       const lines = PATHFINDING_ALGORITHMS[algorithm].pseudocode.length;
       for (const step of steps) {
         expect(step.line).toBeGreaterThanOrEqual(0);
