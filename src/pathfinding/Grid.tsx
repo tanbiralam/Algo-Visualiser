@@ -5,6 +5,9 @@ import {
   END_TILE_STYLE,
   MAX_COLS,
   MAX_ROWS,
+  OVERLAY_BOTH_PATHS_STYLE,
+  OVERLAY_RIVAL_PATH_STYLE,
+  OVERLAY_RIVAL_VISITED_STYLE,
   PATH_TILE_STYLE,
   START_TILE_STYLE,
   TILE_STYLE,
@@ -27,11 +30,28 @@ const Tile = memo(function Tile({ row, col, className }: { row: number; col: num
 
 const same = (a: Point, b: Point) => a.row === b.row && a.col === b.col;
 
-function tileClass(p: Point, cell: number, status: number, start: Point, end: Point, editable: boolean) {
+function tileClass(
+  p: Point,
+  cell: number,
+  status: number,
+  rival: number | undefined,
+  start: Point,
+  end: Point,
+  editable: boolean,
+) {
   if (same(p, start)) return START_TILE_STYLE + (editable ? " cursor-grab" : "");
   if (same(p, end)) return END_TILE_STYLE + (editable ? " cursor-grab" : "");
   if (cell === WALL) return WALL_TILE_STYLE;
   const weighted = cell === WEIGHT;
+  if (rival !== undefined) {
+    // Overlay of two runs: the first fills tiles with indigo and a gold path,
+    // the second outlines its visited tiles and draws its path in vermilion.
+    if (status === PATH && rival === PATH) return OVERLAY_BOTH_PATHS_STYLE;
+    if (rival === PATH) return OVERLAY_RIVAL_PATH_STYLE;
+    if (status === PATH) return weighted ? WEIGHT_PATH_TILE_STYLE : PATH_TILE_STYLE;
+    const fill = status === VISITED ? (weighted ? "bg-ai/60" : "bg-ai/25") : weighted ? WEIGHT_TILE_STYLE : TILE_STYLE;
+    return rival === VISITED ? `${fill} ${OVERLAY_RIVAL_VISITED_STYLE}` : fill;
+  }
   if (status === PATH) return weighted ? WEIGHT_PATH_TILE_STYLE : PATH_TILE_STYLE;
   if (status === VISITED) return weighted ? WEIGHT_TRAVERSED_TILE_STYLE : TRAVERSED_TILE_STYLE;
   return weighted ? WEIGHT_TILE_STYLE : TILE_STYLE;
@@ -51,6 +71,7 @@ const cellOf = (e: PointerEvent): Point | null => {
 export function Grid({
   board,
   status,
+  rival,
   start,
   end,
   brush = WALL,
@@ -59,6 +80,8 @@ export function Grid({
 }: {
   board: Board;
   status: Uint8Array;
+  /** A second run's status, drawn over the first on the same grid. */
+  rival?: Uint8Array;
   start: Point;
   end: Point;
   brush?: number;
@@ -119,9 +142,17 @@ export function Grid({
               key={row * MAX_COLS + col}
               row={row}
               col={col}
-              className={tileClass({ row, col }, cell, status[row * MAX_COLS + col], start, end, editable)}
+              className={tileClass(
+                { row, col },
+                cell,
+                status[row * MAX_COLS + col],
+                rival?.[row * MAX_COLS + col],
+                start,
+                end,
+                editable,
+              )}
             />
-          ))
+          )),
         )}
       </div>
     </div>

@@ -22,6 +22,11 @@ export const PATH_TILE_STYLE = "bg-gold animate-path";
 export const WEIGHT_TILE_STYLE = "bg-ink/20";
 export const WEIGHT_TRAVERSED_TILE_STYLE = "bg-ai/60 animate-traversed";
 export const WEIGHT_PATH_TILE_STYLE = "bg-gold shadow-[inset_0_0_0_2px_rgb(var(--c-ink)/0.45)] animate-path";
+// Compare overlay: the second run outlines what it visits and draws its path in vermilion.
+export const OVERLAY_RIVAL_VISITED_STYLE = "shadow-[inset_0_0_0_1.5px_rgb(var(--c-shu)/0.75)]";
+export const OVERLAY_RIVAL_PATH_STYLE = "bg-shu animate-path";
+export const OVERLAY_BOTH_PATHS_STYLE =
+  "bg-[linear-gradient(135deg,rgb(var(--c-gold))_50%,rgb(var(--c-shu))_50%)] animate-path";
 
 export const MAZE_OPTIONS: { value: MazeType; label: string }[] = [
   { value: "NONE", label: "No maze" },

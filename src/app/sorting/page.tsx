@@ -10,6 +10,7 @@ import { ShareButton } from "@/components/ShareButton";
 import { Stats } from "@/components/Stats";
 import { Button, Pane, Panel, VisualiserShell } from "@/components/VisualiserShell";
 import { LearnCard, LearnIntro, SideTabs } from "@/components/LearnCard";
+import { CodeDrawer, Scoreboard, ScoreRow } from "@/components/Compare";
 import { SORTING_CARDS } from "@/learn/cards";
 import { usePlayer } from "@/engine/usePlayer";
 import { createRandom, newSeed } from "@/lib/random";
@@ -56,6 +57,7 @@ export default function SortingPage() {
     [input, runs, player.index],
   );
   const comparing = runs.length > 1;
+  const sides = runs.map((r, k) => ({ label: r.info.label, swatch: k === 1 ? "bg-ai/80" : "bg-ink/75" }));
 
   return (
     <VisualiserShell
@@ -102,20 +104,51 @@ export default function SortingPage() {
           watch={
             <>
               {!comparing && <LearnIntro card={runs[0].card} onMore={() => setTab("learn")} />}
-              {runs.map(({ info, totals }, k) => (
-                <Panel key={k} title={comparing ? info.label : "Live stats"}>
+              {comparing ? (
+                <>
+                  <Panel title="Head to head">
+                    <Scoreboard
+                      sides={[sides[0], sides[1]]}
+                      rows={[
+                        {
+                          label: "Steps",
+                          cells: [0, 1].map((k) => ({
+                            now: Math.min(player.index, runs[k].steps.length),
+                            total: runs[k].steps.length,
+                          })) as ScoreRow["cells"],
+                        },
+                        ...(["comparisons", "swaps", "writes"] as const).map((key) => ({
+                          label: key[0].toUpperCase() + key.slice(1),
+                          cells: [0, 1].map((k) => ({
+                            now: states[k][key],
+                            total: runs[k].totals[key],
+                          })) as ScoreRow["cells"],
+                        })),
+                      ]}
+                    />
+                  </Panel>
+                  <Panel title="Pseudocode">
+                    <div className="space-y-2">
+                      {runs.map(({ info }, k) => (
+                        <CodeDrawer key={k} side={sides[k]} lines={info.pseudocode} trace={states[k].last} />
+                      ))}
+                    </div>
+                  </Panel>
+                </>
+              ) : (
+                <Panel title="Live stats">
                   <div className="space-y-3">
                     <Stats
                       stats={[
-                        { label: "Comparisons", value: states[k].comparisons, total: totals.comparisons },
-                        { label: "Swaps", value: states[k].swaps, total: totals.swaps },
-                        { label: "Writes", value: states[k].writes, total: totals.writes },
+                        { label: "Comparisons", value: states[0].comparisons, total: runs[0].totals.comparisons },
+                        { label: "Swaps", value: states[0].swaps, total: runs[0].totals.swaps },
+                        { label: "Writes", value: states[0].writes, total: runs[0].totals.writes },
                       ]}
                     />
-                    <Pseudocode lines={info.pseudocode} trace={states[k].last} />
+                    <Pseudocode lines={runs[0].info.pseudocode} trace={states[0].last} />
                   </div>
                 </Panel>
-              ))}
+              )}
               {!comparing && (
                 <>
                   <Panel title="Time complexity">
@@ -163,9 +196,16 @@ export default function SortingPage() {
             <Pane
               key={k}
               label={comparing ? info.label : undefined}
+              swatch={comparing ? sides[k].swatch : undefined}
               status={finished ? `done in ${formatNumber(steps.length)} steps` : `${formatNumber(steps.length)} steps`}
             >
-              <Bars array={states[k].array} active={states[k].active} kind={states[k].last?.type} done={finished} />
+              <Bars
+                array={states[k].array}
+                active={states[k].active}
+                kind={states[k].last?.type}
+                done={finished}
+                tone={k === 1 ? "ai" : "ink"}
+              />
             </Pane>
           );
         })}

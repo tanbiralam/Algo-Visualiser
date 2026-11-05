@@ -103,10 +103,12 @@ export function Panel({ title, children }: { title: string; children: ReactNode 
 /** One visualisation with a caption; compare mode shows two. */
 export function Pane({
   label,
+  swatch,
   status,
   children,
 }: {
-  label?: string;
+  label?: ReactNode;
+  swatch?: string;
   status?: ReactNode;
   children: ReactNode;
 }) {
@@ -114,7 +116,10 @@ export function Pane({
     <div className="flex min-h-0 min-w-0 flex-1 flex-col">
       {label && (
         <div className="mb-2 flex items-baseline justify-between gap-2">
-          <span className="font-display text-base font-semibold">{label}</span>
+          <span className="font-display text-base font-semibold">
+            {swatch && <span className={`mr-2 inline-block h-2.5 w-2.5 rounded-sm ${swatch}`} />}
+            {label}
+          </span>
           <span className="font-mono text-xs text-muted">{status}</span>
         </div>
       )}
