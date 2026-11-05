@@ -3,13 +3,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { BsEraser } from "react-icons/bs";
 import { PlayerControls } from "@/components/PlayerControls";
-import { Pseudocode } from "@/components/Pseudocode";
 import { Stats } from "@/components/Stats";
 import { Select } from "@/components/Select";
 import { ShareButton } from "@/components/ShareButton";
 import { Button, Pane, Panel, VisualiserShell } from "@/components/VisualiserShell";
 import { LearnCard, LearnIntro, SideTabs } from "@/components/LearnCard";
 import { CodeDrawer, Scoreboard, ScoreRow } from "@/components/Compare";
+import { DuelBet, PredictableCode } from "@/components/Predict";
 import { PATHFINDING_CARDS } from "@/learn/cards";
 import { usePlayer } from "@/engine/usePlayer";
 import { formatNumber, useHydrated } from "@/lib/format";
@@ -193,6 +193,13 @@ export default function PathfindingPage() {
               {!comparing && <LearnIntro card={cards[0]} onMore={() => setTab("learn")} />}
               {comparing && runs.length === 2 ? (
                 <>
+                  <DuelBet
+                    key={`${algorithm}-${rival}`}
+                    names={[sides[0].label, sides[1].label]}
+                    scores={[runs[0].search.visited, runs[1].search.visited]}
+                    metric="tile visits"
+                    done={player.done}
+                  />
                   <Panel title="Head to head">
                     <Scoreboard
                       sides={[sides[0], sides[1]]}
@@ -251,7 +258,12 @@ export default function PathfindingPage() {
                           { label: "Search time", value: hydrated ? `${search.ms.toFixed(2)} ms` : "–" },
                         ]}
                       />
-                      <Pseudocode lines={runInfo.pseudocode} trace={traceOf(k)} />
+                      <PredictableCode
+                        lines={runInfo.pseudocode}
+                        current={traceOf(k)}
+                        next={search.steps[player.index]}
+                        player={player}
+                      />
                     </div>
                   </Panel>
                 ))

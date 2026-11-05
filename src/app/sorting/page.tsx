@@ -4,13 +4,13 @@ import { formatNumber } from "@/lib/format";
 import { useEffect, useMemo, useState } from "react";
 import { BsShuffle } from "react-icons/bs";
 import { PlayerControls } from "@/components/PlayerControls";
-import { Pseudocode } from "@/components/Pseudocode";
 import { Select } from "@/components/Select";
 import { ShareButton } from "@/components/ShareButton";
 import { Stats } from "@/components/Stats";
 import { Button, Pane, Panel, VisualiserShell } from "@/components/VisualiserShell";
 import { LearnCard, LearnIntro, SideTabs } from "@/components/LearnCard";
 import { CodeDrawer, Scoreboard, ScoreRow } from "@/components/Compare";
+import { DuelBet, PredictableCode } from "@/components/Predict";
 import { SORTING_CARDS } from "@/learn/cards";
 import { usePlayer } from "@/engine/usePlayer";
 import { createRandom, newSeed } from "@/lib/random";
@@ -106,6 +106,13 @@ export default function SortingPage() {
               {!comparing && <LearnIntro card={runs[0].card} onMore={() => setTab("learn")} />}
               {comparing ? (
                 <>
+                  <DuelBet
+                    key={`${algorithm}-${rival}-${preset}-${size}-${seed}`}
+                    names={[sides[0].label, sides[1].label]}
+                    scores={[runs[0].steps.length, runs[1].steps.length]}
+                    metric="steps"
+                    done={player.done}
+                  />
                   <Panel title="Head to head">
                     <Scoreboard
                       sides={[sides[0], sides[1]]}
@@ -145,7 +152,12 @@ export default function SortingPage() {
                         { label: "Writes", value: states[0].writes, total: runs[0].totals.writes },
                       ]}
                     />
-                    <Pseudocode lines={runs[0].info.pseudocode} trace={states[0].last} />
+                    <PredictableCode
+                      lines={runs[0].info.pseudocode}
+                      current={states[0].last}
+                      next={runs[0].steps[player.index]}
+                      player={player}
+                    />
                   </div>
                 </Panel>
               )}
