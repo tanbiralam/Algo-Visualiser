@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { BsEraser } from "react-icons/bs";
 import { PlayerControls } from "@/components/PlayerControls";
 import { Pseudocode } from "@/components/Pseudocode";
+import { Stats } from "@/components/Stats";
 import { Select } from "@/components/Select";
 import { Button, Panel, VisualiserShell } from "@/components/VisualiserShell";
 import { usePlayer } from "@/engine/usePlayer";
@@ -20,7 +21,7 @@ import {
 } from "@/pathfinding/utils/constants";
 import { AlgorithmType, MazeType } from "@/pathfinding/utils/types";
 
-const NO_SEARCH = { steps: [], visited: 0, pathLength: 0, found: false };
+const NO_SEARCH = { steps: [], visited: 0, pathLength: 0, found: false, ms: 0 };
 const MAZE_FRAMES = 120; // a maze draws in about two seconds
 
 const LEGEND = [
@@ -92,6 +93,17 @@ export default function PathfindingPage() {
       }
       side={
         <>
+          <Stats
+            stats={[
+              { label: "Visited", value: Math.min(player.index, search.visited), total: search.visited },
+              {
+                label: "Path length",
+                value: Math.max(0, player.index - search.visited),
+                total: search.found ? search.pathLength : "no path",
+              },
+              { label: "Search time", value: `${search.ms.toFixed(2)} ms` },
+            ]}
+          />
           <Panel title="Pseudocode">
             <Pseudocode
               lines={info.pseudocode}

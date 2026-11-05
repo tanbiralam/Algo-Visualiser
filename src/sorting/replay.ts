@@ -1,6 +1,6 @@
 import { SortStep } from "./types";
 
-/** State of the array after applying the first `upto` steps. */
+/** State of the array after applying the first `upto` steps, with operation counts. */
 export function replaySort(input: number[], steps: SortStep[], upto: number) {
   const array = input.slice();
   let comparisons = 0;

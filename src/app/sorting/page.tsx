@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { BsShuffle } from "react-icons/bs";
 import { PlayerControls } from "@/components/PlayerControls";
 import { Pseudocode } from "@/components/Pseudocode";
+import { Stats } from "@/components/Stats";
 import { Select } from "@/components/Select";
 import { Button, Panel, VisualiserShell } from "@/components/VisualiserShell";
 import { usePlayer } from "@/engine/usePlayer";
@@ -27,6 +28,7 @@ export default function SortingPage() {
   const steps = useMemo(() => info.run(input), [info, input]);
   const player = usePlayer(steps.length, steps);
   const state = useMemo(() => replaySort(input, steps, player.index), [input, steps, player.index]);
+  const totals = useMemo(() => replaySort(input, steps, steps.length), [input, steps]);
 
   return (
     <VisualiserShell
@@ -46,6 +48,13 @@ export default function SortingPage() {
       }
       side={
         <>
+          <Stats
+            stats={[
+              { label: "Comparisons", value: state.comparisons, total: totals.comparisons },
+              { label: "Swaps", value: state.swaps, total: totals.swaps },
+              { label: "Writes", value: state.writes, total: totals.writes },
+            ]}
+          />
           <Panel title="Pseudocode">
             <Pseudocode lines={info.pseudocode} trace={state.last} />
           </Panel>

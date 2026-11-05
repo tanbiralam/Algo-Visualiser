@@ -19,7 +19,9 @@ const PATH_LINE = 6; // last pseudocode line: follow parents back
 export function runSearch(algorithm: AlgorithmType, walls: Walls, start: TileType, end: TileType) {
   const grid = createGrid(start, end);
   grid.forEach((row, r) => row.forEach((tile, c) => (tile.isWall = walls[r][c])));
+  const startedAt = performance.now();
   const { traversedTiles, path, frontier } = ALGORITHMS[algorithm](grid, start, end);
+  const ms = performance.now() - startedAt;
   const frontierLabel = PATHFINDING_ALGORITHMS[algorithm].frontier;
 
   const visitVars = (tile: TileType, k: number): SearchStep["vars"] => {
@@ -47,7 +49,7 @@ export function runSearch(algorithm: AlgorithmType, walls: Walls, start: TileTyp
       vars: { tile: `(${tile.row}, ${tile.col})`, "path length": `${k + 1} / ${path.length}` },
     })),
   ];
-  return { steps, visited: traversedTiles.length, pathLength: path.length, found: path.length > 0 };
+  return { steps, visited: traversedTiles.length, pathLength: path.length, found: path.length > 0, ms };
 }
 
 export const VISITED = 1;
