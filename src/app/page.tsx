@@ -5,13 +5,13 @@ const visualisers = [
     href: "/sorting",
     title: "Sorting",
     description:
-      "Watch Bubble, Insertion, Selection, Merge and Quick sort rearrange an array step by step.",
+      "Step through seven sorting algorithms, from Bubble to Radix sort, with pseudocode, live counters and side-by-side comparison.",
   },
   {
     href: "/pathfinding",
     title: "Pathfinding",
     description:
-      "Draw walls or generate a maze, then watch BFS, DFS, Dijkstra and A* search for the shortest path.",
+      "Draw walls and weights or generate a maze, then step through BFS, DFS, Dijkstra and A* or race two of them.",
   },
 ];
 
