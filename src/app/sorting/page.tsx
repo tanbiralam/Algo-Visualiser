@@ -1,12 +1,13 @@
 "use client";
 
+import { formatNumber } from "@/lib/format";
 import { useEffect, useMemo, useState } from "react";
 import { BsShuffle } from "react-icons/bs";
 import { PlayerControls } from "@/components/PlayerControls";
 import { Pseudocode } from "@/components/Pseudocode";
-import { Stats } from "@/components/Stats";
 import { Select } from "@/components/Select";
-import { Button, Panel, VisualiserShell } from "@/components/VisualiserShell";
+import { Stats } from "@/components/Stats";
+import { Button, Pane, Panel, VisualiserShell } from "@/components/VisualiserShell";
 import { usePlayer } from "@/engine/usePlayer";
 import { createRandom, newSeed } from "@/lib/random";
 import { SORTING_ALGORITHMS, SORTING_OPTIONS } from "@/sorting/algorithms";
@@ -16,31 +17,39 @@ import { replaySort } from "@/sorting/replay";
 import { SortAlgorithm } from "@/sorting/types";
 
 const ARRAY_SIZE = 80;
+const COMPARE_OPTIONS = [{ value: "none" as const, label: "Nothing" }, ...SORTING_OPTIONS];
 
 export default function SortingPage() {
   const [algorithm, setAlgorithm] = useState<SortAlgorithm>("bubble");
+  const [rival, setRival] = useState<SortAlgorithm | "none">("none");
   // Fixed first seed keeps server and client renders identical; randomise after mount.
   const [seed, setSeed] = useState(1);
   useEffect(() => setSeed(newSeed()), []);
 
   const input = useMemo(() => randomArray(ARRAY_SIZE, createRandom(seed)), [seed]);
-  const info = SORTING_ALGORITHMS[algorithm];
-  const steps = useMemo(() => info.run(input), [info, input]);
-  const player = usePlayer(steps.length, steps);
-  const state = useMemo(() => replaySort(input, steps, player.index), [input, steps, player.index]);
-  const totals = useMemo(() => replaySort(input, steps, steps.length), [input, steps]);
+  const runs = useMemo(
+    () =>
+      (rival === "none" ? [algorithm] : [algorithm, rival]).map((key) => {
+        const info = SORTING_ALGORITHMS[key];
+        const steps = info.run(input);
+        return { info, steps, totals: replaySort(input, steps, steps.length) };
+      }),
+    [algorithm, rival, input]
+  );
+  const player = usePlayer(Math.max(...runs.map((r) => r.steps.length)), runs);
+  const states = useMemo(
+    () => runs.map((r) => replaySort(input, r.steps, Math.min(player.index, r.steps.length))),
+    [input, runs, player.index]
+  );
+  const comparing = runs.length > 1;
 
   return (
     <VisualiserShell
       title="Sorting Visualiser"
       controls={
         <>
-          <Select
-            label="Algorithm"
-            value={algorithm}
-            options={SORTING_OPTIONS}
-            onChange={setAlgorithm}
-          />
+          <Select label="Algorithm" value={algorithm} options={SORTING_OPTIONS} onChange={setAlgorithm} />
+          <Select label="Compare with" value={rival} options={COMPARE_OPTIONS} onChange={setRival} />
           <Button onClick={() => setSeed(newSeed())}>
             <BsShuffle /> New array
           </Button>
@@ -48,29 +57,37 @@ export default function SortingPage() {
       }
       side={
         <>
-          <Stats
-            stats={[
-              { label: "Comparisons", value: state.comparisons, total: totals.comparisons },
-              { label: "Swaps", value: state.swaps, total: totals.swaps },
-              { label: "Writes", value: state.writes, total: totals.writes },
-            ]}
-          />
-          <Panel title="Pseudocode">
-            <Pseudocode lines={info.pseudocode} trace={state.last} />
-          </Panel>
-          <Panel title={info.label}>
-            <p className="leading-relaxed text-gray-400">{info.description}</p>
-          </Panel>
-          <Panel title="Time complexity">
-            <dl className="grid grid-cols-2 gap-y-1">
-              <dt className="text-gray-500">Best</dt>
-              <dd className="font-mono">{info.best}</dd>
-              <dt className="text-gray-500">Average</dt>
-              <dd className="font-mono">{info.average}</dd>
-              <dt className="text-gray-500">Worst</dt>
-              <dd className="font-mono">{info.worst}</dd>
-            </dl>
-          </Panel>
+          {runs.map(({ info, totals }, k) => (
+            <Panel key={k} title={comparing ? info.label : "Live stats"}>
+              <div className="space-y-3">
+                <Stats
+                  stats={[
+                    { label: "Comparisons", value: states[k].comparisons, total: totals.comparisons },
+                    { label: "Swaps", value: states[k].swaps, total: totals.swaps },
+                    { label: "Writes", value: states[k].writes, total: totals.writes },
+                  ]}
+                />
+                <Pseudocode lines={info.pseudocode} trace={states[k].last} />
+              </div>
+            </Panel>
+          ))}
+          {!comparing && (
+            <>
+              <Panel title={runs[0].info.label}>
+                <p className="leading-relaxed text-gray-400">{runs[0].info.description}</p>
+              </Panel>
+              <Panel title="Time complexity">
+                <dl className="grid grid-cols-2 gap-y-1">
+                  <dt className="text-gray-500">Best</dt>
+                  <dd className="font-mono">{runs[0].info.best}</dd>
+                  <dt className="text-gray-500">Average</dt>
+                  <dd className="font-mono">{runs[0].info.average}</dd>
+                  <dt className="text-gray-500">Worst</dt>
+                  <dd className="font-mono">{runs[0].info.worst}</dd>
+                </dl>
+              </Panel>
+            </>
+          )}
           <Panel title="Legend">
             <ul className="space-y-1 text-gray-400">
               <li><span className="mr-2 inline-block h-3 w-3 rounded-sm bg-amber-400" />Comparing</li>
@@ -82,7 +99,20 @@ export default function SortingPage() {
       }
       footer={<PlayerControls player={player} />}
     >
-      <Bars array={state.array} active={state.active} kind={state.last?.type} done={player.done} />
+      <div className="flex w-full flex-col gap-6">
+        {runs.map(({ info, steps }, k) => {
+          const finished = player.index >= steps.length && steps.length > 0;
+          return (
+            <Pane
+              key={k}
+              label={comparing ? info.label : undefined}
+              status={finished ? `done in ${formatNumber(steps.length)} steps` : `${formatNumber(steps.length)} steps`}
+            >
+              <Bars array={states[k].array} active={states[k].active} kind={states[k].last?.type} done={finished} />
+            </Pane>
+          );
+        })}
+      </div>
     </VisualiserShell>
   );
 }

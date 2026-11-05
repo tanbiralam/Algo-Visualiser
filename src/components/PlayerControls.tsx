@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { formatNumber } from "@/lib/format";
 import {
   BsPauseFill,
   BsPlayFill,
@@ -82,7 +83,7 @@ export function PlayerControls({
         className="min-w-[160px] flex-1 accent-purple-500 disabled:opacity-40"
       />
       <span className="w-28 text-right text-xs tabular-nums text-gray-400">
-        step {index.toLocaleString()} / {total.toLocaleString()}
+        step {formatNumber(index)} / {formatNumber(total)}
       </span>
 
       <label className="flex items-center gap-2 text-xs text-gray-400">
@@ -95,7 +96,7 @@ export function PlayerControls({
           onChange={(e) => player.setSpeed(Number(e.target.value))}
           className="w-24 accent-purple-500"
         />
-        <span className="w-16 tabular-nums">{speedToRate(speed).toLocaleString()}/s</span>
+        <span className="w-16 tabular-nums">{formatNumber(speedToRate(speed))}/s</span>
       </label>
     </div>
   );

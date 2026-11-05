@@ -16,21 +16,12 @@ const Tile = memo(function Tile({ row, col, className }: { row: number; col: num
 });
 
 function tileClass(row: number, col: number, isWall: boolean, status: number, start: Point, end: Point) {
-  let cls =
-    row === start.row && col === start.col
-      ? START_TILE_STYLE
-      : row === end.row && col === end.col
-        ? END_TILE_STYLE
-        : isWall
-          ? WALL_TILE_STYLE
-          : status === PATH
-            ? PATH_TILE_STYLE
-            : status === VISITED
-              ? TRAVERSED_TILE_STYLE
-              : TILE_STYLE;
-  if (row === MAX_ROWS - 1) cls += " border-b";
-  if (col === 0) cls += " border-l";
-  return cls;
+  if (row === start.row && col === start.col) return START_TILE_STYLE;
+  if (row === end.row && col === end.col) return END_TILE_STYLE;
+  if (isWall) return WALL_TILE_STYLE;
+  if (status === PATH) return PATH_TILE_STYLE;
+  if (status === VISITED) return TRAVERSED_TILE_STYLE;
+  return TILE_STYLE;
 }
 
 const cellOf = (e: MouseEvent) => {
@@ -77,23 +68,30 @@ export function Grid({
   };
 
   return (
-    <div
-      className={`m-auto select-none ${onPaint ? "cursor-crosshair" : ""}`}
-      onMouseDown={handleDown}
-      onMouseOver={handleOver}
-    >
-      {walls.map((rowWalls, row) => (
-        <div key={row} className="flex">
-          {rowWalls.map((isWall, col) => (
+    // Size container: the grid takes the largest size with the right aspect ratio that fits.
+    <div className="flex h-full w-full items-center justify-center [container-type:size]">
+      <div
+        className={`grid select-none gap-px border border-sky-200/25 bg-sky-200/25 ${onPaint ? "cursor-crosshair" : ""}`}
+        style={{
+          gridTemplateColumns: `repeat(${MAX_COLS}, 1fr)`,
+          gridTemplateRows: `repeat(${MAX_ROWS}, 1fr)`,
+          width: `min(100cqw, 100cqh * ${MAX_COLS / MAX_ROWS})`,
+          aspectRatio: `${MAX_COLS} / ${MAX_ROWS}`,
+        }}
+        onMouseDown={handleDown}
+        onMouseOver={handleOver}
+      >
+        {walls.map((rowWalls, row) =>
+          rowWalls.map((isWall, col) => (
             <Tile
-              key={col}
+              key={row * MAX_COLS + col}
               row={row}
               col={col}
               className={tileClass(row, col, isWall, status[row * MAX_COLS + col], start, end)}
             />
-          ))}
-        </div>
-      ))}
+          ))
+        )}
+      </div>
     </div>
   );
 }

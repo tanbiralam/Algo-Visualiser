@@ -62,3 +62,26 @@ export function Panel({ title, children }: { title: string; children: ReactNode 
     </section>
   );
 }
+
+/** One visualisation with a caption; compare mode shows two side by side. */
+export function Pane({
+  label,
+  status,
+  children,
+}: {
+  label?: string;
+  status?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+      {label && (
+        <div className="mb-2 flex items-baseline justify-between gap-2 text-xs">
+          <span className="font-semibold text-gray-200">{label}</span>
+          <span className="text-gray-500">{status}</span>
+        </div>
+      )}
+      <div className="relative min-h-0 flex-1">{children}</div>
+    </div>
+  );
+}

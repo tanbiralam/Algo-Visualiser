@@ -26,13 +26,13 @@ export const END_TILE_CONFIGURATION = {
   parent: null,
 };
 
-export const TILE_STYLE =
-  "w-[7px] h-[7px] sm:w-[11px] sm:h-[11px] md:w-[13px] md:h-[13px] lg:w-[14px] lg:h-[14px] 2xl:w-[17px] 2xl:h-[17px] border-t border-r border-sky-200/40";
-export const TRAVERSED_TILE_STYLE = TILE_STYLE + " bg-cyan-500 animate-traversed";
-export const START_TILE_STYLE = TILE_STYLE + " bg-green-500";
-export const END_TILE_STYLE = TILE_STYLE + " bg-red-600";
-export const WALL_TILE_STYLE = TILE_STYLE + " bg-gray-200 animate-wall";
-export const PATH_TILE_STYLE = TILE_STYLE + " bg-amber-300 animate-path";
+// Tiles are CSS grid cells; size comes from the grid, the 1px gaps draw the lines.
+export const TILE_STYLE = "bg-[#0a0a0a]";
+export const TRAVERSED_TILE_STYLE = "bg-cyan-500 animate-traversed";
+export const START_TILE_STYLE = "bg-green-500";
+export const END_TILE_STYLE = "bg-red-600";
+export const WALL_TILE_STYLE = "bg-gray-200 animate-wall";
+export const PATH_TILE_STYLE = "bg-amber-300 animate-path";
 
 export const MAZE_OPTIONS: { value: MazeType; label: string }[] = [
   { value: "NONE", label: "No maze" },
@@ -88,7 +88,7 @@ export const PATHFINDING_ALGORITHMS: Record<
       "  tile = pq.popMin(dist); mark visited",
       "  if tile == end: break",
       "  for each unvisited neighbour n of tile",
-      "    if dist[tile] + 1 < dist[n]: update n, push to pq",
+      "    if dist[tile] + 1 < dist[n]: update n",
       "path = follow parents back from end",
     ],
   },
@@ -104,7 +104,7 @@ export const PATHFINDING_ALGORITHMS: Record<
       "  tile = open.popMin(f = g + h); mark visited",
       "  if tile == end: break",
       "  for each unvisited neighbour n of tile",
-      "    if g[tile] + 1 < g[n]: update n, push to open",
+      "    if g[tile] + 1 < g[n]: update n",
       "path = follow parents back from end",
     ],
   },
