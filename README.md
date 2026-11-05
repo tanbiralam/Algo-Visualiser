@@ -1,6 +1,6 @@
 # Algo Visualiser
 
-An interactive web app for stepping through classic algorithms, built with Next.js, TypeScript and Tailwind CSS.
+An interactive web app for understanding classic algorithms, not just memorising them. Built with Next.js, TypeScript and Tailwind CSS.
 
 Every algorithm runs once up front and records each step. The page then renders the state at any step, so you can pause, step backwards, scrub the timeline and compare two algorithms on identical input.
 
@@ -12,7 +12,10 @@ Every algorithm runs once up front and records each step. The page then renders 
 - Keyboard shortcuts: `Space` play/pause, `←` / `→` step
 - Pseudocode panel that highlights the current line and shows the live variables
 - Live stats that track the current step
-- Compare mode: two algorithms side by side on the same input with one timeline
+- Learning card for every algorithm: what it does, the intuition, real-life uses, when to use it, what to watch for, a common mistake and a question that checks understanding
+- Predict the next line: pick the pseudocode line you think runs next and see if you were right
+- Compare mode: two algorithms on the same input with one timeline, a head-to-head scoreboard and a bet on which needs fewer steps; pathfinding can overlay both searches on one grid
+- Light and dark themes, following the system by default
 - Share button: copies a link that reproduces the exact setup
 
 **Sorting** (`/sorting`)
@@ -26,7 +29,7 @@ Every algorithm runs once up front and records each step. The page then renders 
 
 - Breadth-First Search, Depth-First Search, Dijkstra and A*
 - Paint walls or weight tiles (cost 5); Dijkstra and A* route around weights, BFS and DFS ignore them
-- Drag the start and end tiles to move them
+- Drag the start and end tiles to move them (mouse or touch)
 - Mazes: Binary Tree, Recursive Division, Recursive Backtracker and Prim's
 - Shows tiles visited, path length, path cost and search time, and reports when no path exists
 
@@ -66,8 +69,9 @@ Algorithms are pure functions, so they are tested directly: sorts are replayed a
 ```
 src/
   app/                  routes: /, /sorting, /pathfinding
-  components/           shared UI: player controls, pseudocode, stats, shell
+  components/           shared UI: shell, player, pseudocode, stats, learning cards, compare, predictions
   engine/               usePlayer hook and the shared step type
+  learn/                plain-language explanation for each algorithm
   lib/                  seeded random, formatting, URL params
   sorting/              algorithms, replay, input presets, bars
   pathfinding/          search algorithms, mazes, grid, share codec
