@@ -1,8 +1,10 @@
 import { SortAlgorithm, SortStep } from "../types";
 import { bubblePseudocode, bubbleSort } from "./bubble";
+import { heapPseudocode, heapSort } from "./heap";
 import { insertionPseudocode, insertionSort } from "./insertion";
 import { mergePseudocode, mergeSort } from "./merge";
 import { quickPseudocode, quickSort } from "./quick";
+import { radixPseudocode, radixSort } from "./radix";
 import { selectionPseudocode, selectionSort } from "./selection";
 
 type AlgorithmInfo = {
@@ -65,6 +67,26 @@ export const SORTING_ALGORITHMS: Record<SortAlgorithm, AlgorithmInfo> = {
     worst: "O(n²)",
     run: quickSort,
     pseudocode: quickPseudocode,
+  },
+  heap: {
+    label: "Heap Sort",
+    description:
+      "Arranges the array into a max-heap (every parent larger than its children), then repeatedly swaps the largest element to the end and restores the heap on the rest.",
+    best: "O(n log n)",
+    average: "O(n log n)",
+    worst: "O(n log n)",
+    run: heapSort,
+    pseudocode: heapPseudocode,
+  },
+  radix: {
+    label: "Radix Sort",
+    description:
+      "Never compares two elements. Distributes values into 10 buckets by their ones digit, collects them in order, then repeats for the tens and hundreds digits. Each pass is stable, so the order from earlier digits is kept. d = number of digits.",
+    best: "O(d·n)",
+    average: "O(d·n)",
+    worst: "O(d·n)",
+    run: radixSort,
+    pseudocode: radixPseudocode,
   },
 };
 

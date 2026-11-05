@@ -11,7 +11,7 @@ export function Bars({
   kind?: SortStep["type"];
   done: boolean;
 }) {
-  const highlight = kind === "compare" ? "bg-amber-400" : "bg-rose-500";
+  const highlight = kind === "compare" ? "bg-amber-400" : kind === "read" ? "bg-sky-400" : "bg-rose-500";
   return (
     <div className="flex h-full w-full items-end gap-px">
       {array.map((value, i) => (

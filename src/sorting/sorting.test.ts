@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createRandom, randomInt } from "@/lib/random";
 import { SORTING_ALGORITHMS } from "@/sorting/algorithms";
 import { replaySort } from "@/sorting/replay";
+import { generateInput, INPUT_OPTIONS } from "@/sorting/input";
 
 const rand = createRandom(42);
 const inputs: number[][] = [
@@ -51,4 +52,40 @@ describe("pseudocode trace", () => {
       expect(step.line).toBeLessThan(pseudocode.length);
     }
   });
+});
+
+describe("generateInput", () => {
+  const sortedAsc = (a: number[]) => a.every((x, i) => i === 0 || a[i - 1] <= x);
+
+  it("produces the requested size within range, reproducibly", () => {
+    for (const { value } of INPUT_OPTIONS) {
+      const a = generateInput(value, 57, createRandom(9));
+      expect(a).toHaveLength(57);
+      expect(a.every((x) => x >= 5 && x <= 100)).toBe(true);
+      expect(generateInput(value, 57, createRandom(9))).toEqual(a);
+    }
+  });
+
+  it("shapes the input per preset", () => {
+    const reversed = generateInput("reversed", 100, createRandom(1));
+    expect(sortedAsc(reversed.slice().reverse())).toBe(true);
+    expect(new Set(generateInput("few", 100, createRandom(1))).size).toBeLessThanOrEqual(4);
+    const nearly = generateInput("nearly", 100, createRandom(1));
+    const outOfOrder = nearly.filter((x, i) => i > 0 && nearly[i - 1] > x).length;
+    expect(outOfOrder).toBeGreaterThan(0);
+    expect(outOfOrder).toBeLessThanOrEqual(10);
+  });
+});
+
+describe("radix sort", () => {
+  it("never compares elements", () => {
+    const input = generateInput("random", 60, createRandom(4));
+    const steps = SORTING_ALGORITHMS.radix.run(input);
+    expect(replaySort(input, steps, steps.length).comparisons).toBe(0);
+  });
+});
+
+it("pseudocode lines fit the side panel", () => {
+  for (const { pseudocode } of Object.values(SORTING_ALGORITHMS))
+    for (const line of pseudocode) expect(line.length).toBeLessThanOrEqual(48);
 });

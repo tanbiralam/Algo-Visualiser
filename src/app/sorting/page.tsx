@@ -12,21 +12,22 @@ import { usePlayer } from "@/engine/usePlayer";
 import { createRandom, newSeed } from "@/lib/random";
 import { SORTING_ALGORITHMS, SORTING_OPTIONS } from "@/sorting/algorithms";
 import { Bars } from "@/sorting/Bars";
-import { randomArray } from "@/sorting/input";
+import { generateInput, INPUT_OPTIONS, InputPreset } from "@/sorting/input";
 import { replaySort } from "@/sorting/replay";
 import { SortAlgorithm } from "@/sorting/types";
 
-const ARRAY_SIZE = 80;
 const COMPARE_OPTIONS = [{ value: "none" as const, label: "Nothing" }, ...SORTING_OPTIONS];
 
 export default function SortingPage() {
   const [algorithm, setAlgorithm] = useState<SortAlgorithm>("bubble");
   const [rival, setRival] = useState<SortAlgorithm | "none">("none");
+  const [preset, setPreset] = useState<InputPreset>("random");
+  const [size, setSize] = useState(80);
   // Fixed first seed keeps server and client renders identical; randomise after mount.
   const [seed, setSeed] = useState(1);
   useEffect(() => setSeed(newSeed()), []);
 
-  const input = useMemo(() => randomArray(ARRAY_SIZE, createRandom(seed)), [seed]);
+  const input = useMemo(() => generateInput(preset, size, createRandom(seed)), [preset, size, seed]);
   const runs = useMemo(
     () =>
       (rival === "none" ? [algorithm] : [algorithm, rival]).map((key) => {
@@ -50,6 +51,18 @@ export default function SortingPage() {
         <>
           <Select label="Algorithm" value={algorithm} options={SORTING_OPTIONS} onChange={setAlgorithm} />
           <Select label="Compare with" value={rival} options={COMPARE_OPTIONS} onChange={setRival} />
+          <Select label="Input" value={preset} options={INPUT_OPTIONS} onChange={setPreset} />
+          <label className="flex flex-col gap-1 text-xs text-gray-400">
+            Size: {size}
+            <input
+              type="range"
+              min={8}
+              max={200}
+              value={size}
+              onChange={(e) => setSize(Number(e.target.value))}
+              className="h-9 w-32 accent-purple-500"
+            />
+          </label>
           <Button onClick={() => setSeed(newSeed())}>
             <BsShuffle /> New array
           </Button>
@@ -91,6 +104,7 @@ export default function SortingPage() {
           <Panel title="Legend">
             <ul className="space-y-1 text-gray-400">
               <li><span className="mr-2 inline-block h-3 w-3 rounded-sm bg-amber-400" />Comparing</li>
+              <li><span className="mr-2 inline-block h-3 w-3 rounded-sm bg-sky-400" />Reading a digit (radix)</li>
               <li><span className="mr-2 inline-block h-3 w-3 rounded-sm bg-rose-500" />Swap / write</li>
               <li><span className="mr-2 inline-block h-3 w-3 rounded-sm bg-system-green60" />Sorted</li>
             </ul>

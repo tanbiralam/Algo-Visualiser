@@ -14,12 +14,12 @@ export function replaySort(input: number[], steps: SortStep[], upto: number) {
       const [x, y] = step.indices;
       [array[x], array[y]] = [array[y], array[x]];
       swaps++;
-    } else {
+    } else if (step.type === "write") {
       array[step.index] = step.value;
       writes++;
     }
   }
   const last = upto > 0 ? steps[upto - 1] : undefined;
-  const active = !last ? [] : last.type === "write" ? [last.index] : last.indices;
+  const active = !last ? [] : "index" in last ? [last.index] : last.indices;
   return { array, last, active, comparisons, swaps, writes };
 }

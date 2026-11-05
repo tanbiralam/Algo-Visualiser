@@ -133,3 +133,8 @@ describe("runSearch trace", () => {
     }
   });
 });
+
+it("pseudocode lines fit the side panel", () => {
+  for (const { pseudocode } of Object.values(PATHFINDING_ALGORITHMS))
+    for (const line of pseudocode) expect(line.length).toBeLessThanOrEqual(48);
+});
