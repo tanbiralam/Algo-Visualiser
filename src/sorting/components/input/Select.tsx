@@ -1,4 +1,4 @@
-import { SelectOptionsType } from "@/lib/types";
+import { SelectOptionsType } from "@/sorting/lib/types";
 import React from "react";
 
 export const Select = ({

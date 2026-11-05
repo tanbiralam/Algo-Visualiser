@@ -1,4 +1,4 @@
-import { AnimationArrayType } from "@/lib/types";
+import { AnimationArrayType } from "@/sorting/lib/types";
 
 function merge(
   array: number[],

@@ -1,10 +1,10 @@
 "use client";
 
-import { AnimationArrayType, SortingAlgorithmType } from "@/lib/types";
+import { AnimationArrayType, SortingAlgorithmType } from "@/sorting/lib/types";
 import {
   MAX_ANIMATION_SPEED,
   generateRandomNumberFromInterval,
-} from "@/lib/utils";
+} from "@/sorting/lib/utils";
 import React, {
   ReactNode,
   createContext,

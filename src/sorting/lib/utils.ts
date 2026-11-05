@@ -1,9 +1,9 @@
-import { generateQuickSortAnimationArray } from "@/algorithm/quickSort";
+import { generateQuickSortAnimationArray } from "@/sorting/algorithm/quickSort";
 import { SortingAlgorithmType } from "./types";
-import { generateBubbleSortAnimationArray } from "@/algorithm/bubbleSort";
-import { generateMergeSortAnimationArray } from "@/algorithm/mergeSort";
-import { generateInsertionSortAnimationArray } from "@/algorithm/insertionSort";
-import { generateSelectionSortAnimationArray } from "@/algorithm/selectionSort";
+import { generateBubbleSortAnimationArray } from "@/sorting/algorithm/bubbleSort";
+import { generateMergeSortAnimationArray } from "@/sorting/algorithm/mergeSort";
+import { generateInsertionSortAnimationArray } from "@/sorting/algorithm/insertionSort";
+import { generateSelectionSortAnimationArray } from "@/sorting/algorithm/selectionSort";
 
 export function generateRandomNumberFromInterval(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1) + min);
