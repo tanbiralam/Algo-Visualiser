@@ -11,15 +11,16 @@ export function Bars({
   kind?: SortStep["type"];
   done: boolean;
 }) {
-  const highlight = kind === "compare" ? "bg-amber-400" : kind === "read" ? "bg-sky-400" : "bg-rose-500";
+  const highlight = kind === "compare" ? "bg-shu" : kind === "read" ? "bg-ai" : "bg-shu -translate-y-1";
   return (
-    <div className="flex h-full w-full items-end gap-px">
+    // Gaps only while bars are wide enough; at 200 bars on a phone, 1px gaps alone overflow.
+    <div className={`flex h-full w-full items-end ${array.length > 100 ? "" : "gap-px"}`}>
       {array.map((value, i) => (
         <div
           key={i}
           style={{ height: `${value}%` }}
-          className={`flex-1 rounded-t-sm ${
-            done ? "bg-system-green60" : active.includes(i) ? highlight : "bg-system-purple50"
+          className={`min-w-0 flex-1 rounded-t-[2px] transition-transform duration-100 ${
+            done ? "bg-gold" : active.includes(i) ? highlight : "bg-ink/75"
           }`}
         />
       ))}

@@ -1,4 +1,4 @@
-import { memo, MouseEvent, useEffect, useRef } from "react";
+import { memo, PointerEvent, useEffect, useRef } from "react";
 import { Board, PATH, VISITED } from "./search";
 import {
   EMPTY,
@@ -37,8 +37,10 @@ function tileClass(p: Point, cell: number, status: number, start: Point, end: Po
   return weighted ? WEIGHT_TILE_STYLE : TILE_STYLE;
 }
 
-const cellOf = (e: MouseEvent): Point | null => {
-  const el = (e.target as HTMLElement).closest<HTMLElement>("[data-row]");
+// Look up the tile under the pointer rather than the event target: touch events keep
+// targeting the tile where the drag started.
+const cellOf = (e: PointerEvent): Point | null => {
+  const el = document.elementFromPoint(e.clientX, e.clientY)?.closest<HTMLElement>("[data-row]");
   return el ? { row: Number(el.dataset.row), col: Number(el.dataset.col) } : null;
 };
 
@@ -66,12 +68,16 @@ export function Grid({
   const drag = useRef<Drag>(null);
   useEffect(() => {
     const stop = () => (drag.current = null);
-    window.addEventListener("mouseup", stop);
-    return () => window.removeEventListener("mouseup", stop);
+    window.addEventListener("pointerup", stop);
+    window.addEventListener("pointercancel", stop);
+    return () => {
+      window.removeEventListener("pointerup", stop);
+      window.removeEventListener("pointercancel", stop);
+    };
   }, []);
   const editable = Boolean(onPaint);
 
-  const handleDown = (e: MouseEvent) => {
+  const handleDown = (e: PointerEvent) => {
     const cell = cellOf(e);
     if (!onPaint || !cell) return;
     e.preventDefault(); // stop text selection while dragging
@@ -84,10 +90,11 @@ export function Grid({
     }
   };
 
-  const handleOver = (e: MouseEvent) => {
-    const cell = cellOf(e);
+  const handleMove = (e: PointerEvent) => {
     const d = drag.current;
-    if (!d || !cell || same(cell, start) || same(cell, end)) return;
+    if (!d) return;
+    const cell = cellOf(e);
+    if (!cell || same(cell, start) || same(cell, end)) return;
     if (d.kind === "paint") onPaint?.(cell.row, cell.col, d.value);
     else if (board[cell.row][cell.col] !== WALL) onMoveEndpoint?.(d.kind, cell);
   };
@@ -96,15 +103,15 @@ export function Grid({
     // Size container: the grid takes the largest size with the right aspect ratio that fits.
     <div className="flex h-full w-full items-center justify-center [container-type:size]">
       <div
-        className={`grid select-none gap-px border border-sky-200/25 bg-sky-200/25 ${editable ? "cursor-crosshair" : ""}`}
+        className={`grid select-none gap-px rounded-sm border border-line bg-line ${editable ? "cursor-crosshair touch-none" : ""}`}
         style={{
           gridTemplateColumns: `repeat(${MAX_COLS}, 1fr)`,
           gridTemplateRows: `repeat(${MAX_ROWS}, 1fr)`,
           width: `min(100cqw, 100cqh * ${MAX_COLS / MAX_ROWS})`,
           aspectRatio: `${MAX_COLS} / ${MAX_ROWS}`,
         }}
-        onMouseDown={handleDown}
-        onMouseOver={handleOver}
+        onPointerDown={handleDown}
+        onPointerMove={handleMove}
       >
         {board.map((cells, row) =>
           cells.map((cell, col) => (

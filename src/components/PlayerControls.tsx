@@ -28,7 +28,7 @@ function IconButton({
       title={label}
       onClick={onClick}
       disabled={disabled}
-      className="rounded-md p-2 text-gray-300 transition hover:bg-white/10 hover:text-white disabled:pointer-events-none disabled:opacity-30"
+      className="grid h-9 w-9 place-items-center rounded-md text-muted transition hover:bg-sunk hover:text-ink disabled:pointer-events-none disabled:opacity-30"
     >
       {children}
     </button>
@@ -46,8 +46,8 @@ export function PlayerControls({
   const off = disabled || total === 0;
 
   return (
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-      <div className="flex items-center gap-1">
+    <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+      <div className="flex items-center gap-0.5">
         <IconButton label="Back to start" onClick={() => player.seek(0)} disabled={off || index === 0}>
           <BsSkipStartFill className="h-4 w-4" />
         </IconButton>
@@ -60,9 +60,9 @@ export function PlayerControls({
           title={playing ? "Pause (space)" : "Play (space)"}
           onClick={player.toggle}
           disabled={off}
-          className="rounded-full bg-system-green60 p-2.5 text-black transition hover:bg-system-green70 disabled:pointer-events-none disabled:opacity-40"
+          className="mx-1 grid h-10 w-10 place-items-center rounded-full bg-ink text-bg transition hover:bg-ink/85 active:scale-95 disabled:pointer-events-none disabled:opacity-40"
         >
-          {playing ? <BsPauseFill className="h-5 w-5" /> : <BsPlayFill className="h-5 w-5" />}
+          {playing ? <BsPauseFill className="h-5 w-5" /> : <BsPlayFill className="ml-0.5 h-5 w-5" />}
         </button>
         <IconButton label="Step forward (→)" onClick={player.stepForward} disabled={off || index >= total}>
           <BsSkipForwardFill className="h-4 w-4" />
@@ -72,31 +72,33 @@ export function PlayerControls({
         </IconButton>
       </div>
 
-      <input
-        type="range"
-        aria-label="Timeline"
-        min={0}
-        max={total}
-        value={index}
-        disabled={off}
-        onChange={(e) => player.seek(Number(e.target.value))}
-        className="min-w-[160px] flex-1 accent-purple-500 disabled:opacity-40"
-      />
-      <span className="w-28 text-right text-xs tabular-nums text-gray-400">
-        step {formatNumber(index)} / {formatNumber(total)}
-      </span>
+      <div className="flex min-w-[200px] flex-1 items-center gap-3">
+        <input
+          type="range"
+          aria-label="Timeline"
+          min={0}
+          max={total}
+          value={index}
+          disabled={off}
+          onChange={(e) => player.seek(Number(e.target.value))}
+          className="min-w-0 flex-1 disabled:opacity-40"
+        />
+        <span className="shrink-0 font-mono text-xs tabular-nums text-muted">
+          {formatNumber(index)} / {formatNumber(total)}
+        </span>
+      </div>
 
-      <label className="flex items-center gap-2 text-xs text-gray-400">
-        Speed
+      <label className="flex items-center gap-2 text-xs text-muted">
+        <span className="uppercase tracking-[0.12em]">Speed</span>
         <input
           type="range"
           min={0}
           max={100}
           value={speed}
           onChange={(e) => player.setSpeed(Number(e.target.value))}
-          className="w-24 accent-purple-500"
+          className="w-24"
         />
-        <span className="w-16 tabular-nums">{formatNumber(speedToRate(speed))}/s</span>
+        <span className="w-16 font-mono tabular-nums text-ink">{formatNumber(speedToRate(speed))}/s</span>
       </label>
     </div>
   );

@@ -56,21 +56,23 @@ export default function SortingPage() {
 
   return (
     <VisualiserShell
-      title="Sorting Visualiser"
+      section="sorting"
       controls={
         <>
           <Select label="Algorithm" value={algorithm} options={SORTING_OPTIONS} onChange={setAlgorithm} />
           <Select label="Compare with" value={rival} options={COMPARE_OPTIONS} onChange={setRival} />
           <Select label="Input" value={preset} options={INPUT_OPTIONS} onChange={setPreset} />
-          <label className="flex flex-col gap-1 text-xs text-gray-400">
-            Size: {size}
+          <label className="flex flex-col gap-1">
+            <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted">
+              Size <span className="font-mono normal-case tracking-normal text-ink">{size}</span>
+            </span>
             <input
               type="range"
               min={MIN_SIZE}
               max={MAX_SIZE}
               value={size}
               onChange={(e) => setSize(Number(e.target.value))}
-              className="h-9 w-32 accent-purple-500"
+              className="h-9 w-full sm:w-32"
             />
           </label>
           <Button onClick={() => setSeed(newSeed())}>
@@ -106,26 +108,26 @@ export default function SortingPage() {
           {!comparing && (
             <>
               <Panel title={runs[0].info.label}>
-                <p className="leading-relaxed text-gray-400">{runs[0].info.description}</p>
+                <p className="leading-relaxed text-muted">{runs[0].info.description}</p>
               </Panel>
               <Panel title="Time complexity">
                 <dl className="grid grid-cols-2 gap-y-1">
-                  <dt className="text-gray-500">Best</dt>
+                  <dt className="text-muted">Best</dt>
                   <dd className="font-mono">{runs[0].info.best}</dd>
-                  <dt className="text-gray-500">Average</dt>
+                  <dt className="text-muted">Average</dt>
                   <dd className="font-mono">{runs[0].info.average}</dd>
-                  <dt className="text-gray-500">Worst</dt>
+                  <dt className="text-muted">Worst</dt>
                   <dd className="font-mono">{runs[0].info.worst}</dd>
                 </dl>
               </Panel>
             </>
           )}
           <Panel title="Legend">
-            <ul className="space-y-1 text-gray-400">
-              <li><span className="mr-2 inline-block h-3 w-3 rounded-sm bg-amber-400" />Comparing</li>
-              <li><span className="mr-2 inline-block h-3 w-3 rounded-sm bg-sky-400" />Reading a digit (radix)</li>
-              <li><span className="mr-2 inline-block h-3 w-3 rounded-sm bg-rose-500" />Swap / write</li>
-              <li><span className="mr-2 inline-block h-3 w-3 rounded-sm bg-system-green60" />Sorted</li>
+            <ul className="space-y-1.5 text-muted">
+              <li><span className="mr-2 inline-block h-3 w-3 rounded-sm bg-shu align-[-1px]" />Comparing</li>
+              <li><span className="mr-2 inline-block h-3 w-3 rounded-sm bg-ai align-[-1px]" />Reading a digit (radix)</li>
+              <li><span className="mr-2 inline-block h-3 w-3 -translate-y-0.5 rounded-sm bg-shu align-[-1px]" />Swap or write (lifted)</li>
+              <li><span className="mr-2 inline-block h-3 w-3 rounded-sm bg-gold align-[-1px]" />Sorted</li>
             </ul>
           </Panel>
         </>

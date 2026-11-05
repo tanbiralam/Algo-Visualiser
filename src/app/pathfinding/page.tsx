@@ -36,12 +36,12 @@ const BRUSH_OPTIONS = [
 ] as const;
 
 const LEGEND = [
-  ["bg-green-500", "Start"],
-  ["bg-red-600", "End"],
-  ["bg-gray-200", "Wall"],
-  ["bg-purple-700", `Weight: costs ${WEIGHT_COST} to enter`],
-  ["bg-cyan-500", "Visited"],
-  ["bg-amber-300", "Path"],
+  ["bg-moss rounded-full", "Start"],
+  ["bg-shu", "End"],
+  ["bg-ink", "Wall"],
+  ["bg-ink/20", `Weight: costs ${WEIGHT_COST} to enter`],
+  ["bg-ai/25", "Visited"],
+  ["bg-gold", "Path"],
 ] as const;
 
 export default function PathfindingPage() {
@@ -128,7 +128,7 @@ export default function PathfindingPage() {
 
   return (
     <VisualiserShell
-      title="Pathfinding Visualiser"
+      section="pathfinding"
       controls={
         <>
           <Select label="Maze" value={maze} options={MAZE_OPTIONS} onChange={generateMaze} disabled={locked} />
@@ -174,22 +174,22 @@ export default function PathfindingPage() {
             </Panel>
           ))}
           {!comparing && <Panel title={info.label}>
-            <p className="leading-relaxed text-gray-400">{info.description}</p>
-            <p className="mt-2 text-gray-500">
-              Guarantees: <span className="text-gray-300">{info.guarantee}</span>
+            <p className="leading-relaxed text-muted">{info.description}</p>
+            <p className="mt-2 text-muted">
+              Guarantees: <span className="text-ink">{info.guarantee}</span>
             </p>
           </Panel>}
           <Panel title="How to use">
-            <p className="leading-relaxed text-gray-400">
-              Click and drag to paint walls or weights (pick the brush), or generate a maze. Drag the green and
-              red tiles to move the start and end. Press play (space) to run, and ← / → to step.
+            <p className="leading-relaxed text-muted">
+              Click or touch and drag to paint walls or weights (pick the brush), or generate a maze. Drag the
+              start and end tiles to move them. Press play (space) to run, and ← / → to step.
             </p>
           </Panel>
           <Panel title="Legend">
-            <ul className="space-y-1 text-gray-400">
+            <ul className="space-y-1.5 text-muted">
               {LEGEND.map(([color, label]) => (
                 <li key={label}>
-                  <span className={`mr-2 inline-block h-3 w-3 rounded-sm ${color}`} />
+                  <span className={`mr-2 inline-block h-3 w-3 rounded-sm align-[-1px] ${color}`} />
                   {label}
                 </li>
               ))}
@@ -219,7 +219,7 @@ export default function PathfindingPage() {
                 onMoveEndpoint={moveEndpoint}
               />
               {finished && !run?.search.found && (
-                <p className="absolute left-1/2 top-2 -translate-x-1/2 rounded-md bg-red-500/15 px-3 py-1 text-sm text-red-300">
+                <p className="absolute left-1/2 top-2 -translate-x-1/2 rounded-md border border-shu/30 bg-surface px-3 py-1 text-sm text-shu shadow-sm">
                   No path found: the end tile is walled off.
                 </p>
               )}

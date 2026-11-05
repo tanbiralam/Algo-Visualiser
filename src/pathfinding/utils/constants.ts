@@ -13,15 +13,15 @@ export const WEIGHT = 2;
 export const WEIGHT_COST = 5; // stepping onto a weight tile costs 5 instead of 1
 
 // Tiles are CSS grid cells; size comes from the grid, the 1px gaps draw the lines.
-export const TILE_STYLE = "bg-[#0a0a0a]";
-export const TRAVERSED_TILE_STYLE = "bg-cyan-500 animate-traversed";
-export const START_TILE_STYLE = "bg-green-500";
-export const END_TILE_STYLE = "bg-red-600";
-export const WALL_TILE_STYLE = "bg-gray-200 animate-wall";
-export const PATH_TILE_STYLE = "bg-amber-300 animate-path";
-export const WEIGHT_TILE_STYLE = "bg-purple-700";
-export const WEIGHT_TRAVERSED_TILE_STYLE = "bg-cyan-800 animate-traversed";
-export const WEIGHT_PATH_TILE_STYLE = "bg-amber-600 animate-path";
+export const TILE_STYLE = "bg-surface";
+export const TRAVERSED_TILE_STYLE = "bg-ai/25 animate-traversed";
+export const START_TILE_STYLE = "bg-moss rounded-full";
+export const END_TILE_STYLE = "bg-shu rounded-[2px]";
+export const WALL_TILE_STYLE = "bg-ink animate-wall";
+export const PATH_TILE_STYLE = "bg-gold animate-path";
+export const WEIGHT_TILE_STYLE = "bg-ink/20";
+export const WEIGHT_TRAVERSED_TILE_STYLE = "bg-ai/60 animate-traversed";
+export const WEIGHT_PATH_TILE_STYLE = "bg-gold shadow-[inset_0_0_0_2px_rgb(var(--c-ink)/0.45)] animate-path";
 
 export const MAZE_OPTIONS: { value: MazeType; label: string }[] = [
   { value: "NONE", label: "No maze" },

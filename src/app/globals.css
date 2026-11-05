@@ -2,8 +2,71 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Colour tokens as RGB triplets so Tailwind can add alpha (bg-ink/20).
+   Light: washi paper and sumi ink. Dark: lacquer at night. Vermilion (shu) marks "now". */
+:root {
+  --c-bg: 244 239 230;
+  --c-surface: 251 248 242;
+  --c-sunk: 237 230 218;
+  --c-ink: 28 26 23;
+  --c-muted: 107 100 90;
+  --c-line: 221 212 196;
+  --c-shu: 200 64 47;
+  --c-ai: 46 74 107;
+  --c-gold: 169 132 47;
+  --c-moss: 94 115 72;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --c-bg: 18 16 16;
+    --c-surface: 28 24 23;
+    --c-sunk: 23 20 19;
+    --c-ink: 236 229 216;
+    --c-muted: 154 144 131;
+    --c-line: 46 40 38;
+    --c-shu: 224 88 63;
+    --c-ai: 127 160 200;
+    --c-gold: 209 170 90;
+    --c-moss: 155 176 127;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --c-bg: 18 16 16;
+  --c-surface: 28 24 23;
+  --c-sunk: 23 20 19;
+  --c-ink: 236 229 216;
+  --c-muted: 154 144 131;
+  --c-line: 46 40 38;
+  --c-shu: 224 88 63;
+  --c-ai: 127 160 200;
+  --c-gold: 209 170 90;
+  --c-moss: 155 176 127;
+  color-scheme: dark;
+}
+
 body {
-  color: #ededed;
-  background: #0a0a0a;
-  font-family: Arial, Helvetica, sans-serif;
+  background: rgb(var(--c-bg));
+  color: rgb(var(--c-ink));
+}
+
+input[type="range"] {
+  accent-color: rgb(var(--c-shu));
+}
+
+:focus-visible {
+  outline: 2px solid rgb(var(--c-shu));
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
 }

@@ -7,13 +7,13 @@ export function Stats({ stats }: { stats: Stat[] }) {
   return (
     <dl className={`grid gap-2 ${stats.length === 4 ? "grid-cols-2" : "grid-cols-3"}`}>
       {stats.map(({ label, value, total }) => (
-        <div key={label} className="rounded-md bg-white/5 px-3 py-2">
-          <dt className="text-[11px] uppercase tracking-wide text-gray-500">{label}</dt>
-          <dd className="mt-0.5 font-mono text-lg tabular-nums text-white">
+        <div key={label} className="min-w-0 rounded-md border border-line bg-bg px-3 py-2">
+          <dt className="truncate text-[11px] text-muted">{label}</dt>
+          <dd className="mt-0.5 font-mono text-lg font-semibold tabular-nums">
             {typeof value === "number" ? formatNumber(value) : value}
           </dd>
           {total !== undefined && (
-            <dd className="font-mono text-[11px] tabular-nums text-gray-500">
+            <dd className="font-mono text-[11px] tabular-nums text-muted">
               of {typeof total === "number" ? formatNumber(total) : total}
             </dd>
           )}
