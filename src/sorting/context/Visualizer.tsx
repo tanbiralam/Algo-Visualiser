@@ -3,6 +3,7 @@
 import { AnimationArrayType, SortingAlgorithmType } from "@/sorting/lib/types";
 import {
   MAX_ANIMATION_SPEED,
+  MIN_ANIMATION_SPEED,
   generateRandomNumberFromInterval,
 } from "@/sorting/lib/utils";
 import React, {
@@ -10,6 +11,7 @@ import React, {
   createContext,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 
@@ -45,6 +47,10 @@ export const SortingAlgorithmProvider = ({
   const [animationSpeed, setAnimationSpeed] =
     useState<number>(MAX_ANIMATION_SPEED);
   const requiresReset = isAnimationComplete || isSorting;
+  const timeoutsRef = useRef<number[]>([]);
+  const schedule = (fn: () => void, ms: number) => {
+    timeoutsRef.current.push(window.setTimeout(fn, ms));
+  };
 
   useEffect(() => {
     resetArrayAndAnimation();
@@ -72,11 +78,8 @@ export const SortingAlgorithmProvider = ({
     setIsSorting(false);
     setIsAnimationComplete(false);
 
-    const highestId = window.setTimeout(() => {
-      for (let i = highestId; i >= 0; i--) {
-        window.clearInterval(i);
-      }
-    }, 0);
+    timeoutsRef.current.forEach((id) => window.clearTimeout(id));
+    timeoutsRef.current = [];
 
     setTimeout(() => {
       const arrLines = document.getElementsByClassName("array-line");
@@ -90,7 +93,11 @@ export const SortingAlgorithmProvider = ({
   const runAnimation = (animations: AnimationArrayType) => {
     setIsSorting(true);
 
-    const inverseSpeed = (1 / animationSpeed) * 200;
+    // Slider maps linearly to a 50ms (slow) .. 1ms (fast) delay per step.
+    const inverseSpeed =
+      1 +
+      (49 * (MAX_ANIMATION_SPEED - animationSpeed)) /
+        (MAX_ANIMATION_SPEED - MIN_ANIMATION_SPEED);
     const arrLines = document.getElementsByClassName(
       "array-line"
     ) as HTMLCollectionOf<HTMLElement>;
@@ -114,7 +121,7 @@ export const SortingAlgorithmProvider = ({
     };
 
     animations.forEach((animation, index) => {
-      setTimeout(() => {
+      schedule(() => {
         const [lineIndexes, isSwap] = animation;
         if (!isSwap) {
           updateClassList(
@@ -122,7 +129,7 @@ export const SortingAlgorithmProvider = ({
             "change-line-color",
             "default-line-color"
           );
-          setTimeout(
+          schedule(
             () =>
               updateClassList(
                 lineIndexes,
@@ -139,13 +146,13 @@ export const SortingAlgorithmProvider = ({
     });
 
     const finalTimeout = animations.length * inverseSpeed;
-    setTimeout(() => {
+    schedule(() => {
       Array.from(arrLines).forEach((line) => {
         line.classList.add("pulse-animation", "change-line-color");
         line.classList.remove("default-line-color");
       });
 
-      setTimeout(() => {
+      schedule(() => {
         Array.from(arrLines).forEach((line) => {
           line.classList.remove("pulse-animation", "change-line-color");
           line.classList.add("default-line-color");

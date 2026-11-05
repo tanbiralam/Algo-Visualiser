@@ -23,6 +23,7 @@ export function Nav({
   isVisualizingRunningRef: MutableRefObject<boolean>;
 }) {
   const [isDisabled, setIsDisabled] = useState(false);
+  const [noPath, setNoPath] = useState(false);
   const {
     maze,
     setMaze,
@@ -37,9 +38,11 @@ export function Nav({
   const { speed, setSpeed } = useSpeed();
 
   const handleGenerateMaze = (maze: MazeType) => {
+    setNoPath(false);
+    resetGrid({ grid, startTile, endTile });
     if (maze === "NONE") {
       setMaze(maze);
-      resetGrid({ grid, startTile, endTile });
+      setIsGraphVisualized(false);
       return;
     }
 
@@ -61,6 +64,7 @@ export function Nav({
   const handlerRunVisualizer = () => {
     if (isGraphVisualized) {
       setIsGraphVisualized(false);
+      setNoPath(false);
       resetGrid({ grid: grid.slice(), startTile, endTile });
       return;
     }
@@ -72,6 +76,7 @@ export function Nav({
     });
 
     animatePath(traversedTiles, path, startTile, endTile, speed);
+    setNoPath(path.length === 0);
     setIsDisabled(true);
     isVisualizingRunningRef.current = true;
 
@@ -81,10 +86,11 @@ export function Nav({
       setIsGraphVisualized(true);
       setIsDisabled(false);
       isVisualizingRunningRef.current = false;
-    }, SLEEP_TIME * (traversedTiles.length + SLEEP_TIME * 2) + EXTENDED_SLEEP_TIME * (path.length + 60) * SPEEDS.find((s) => s.value === speed)!.value);
+      // Same schedule as animatePath, plus time for the last tile's CSS animation.
+    }, speed * (SLEEP_TIME * traversedTiles.length + EXTENDED_SLEEP_TIME * path.length) + 500);
   };
   return (
-    <div className="flex items-center justify-center min-h-[4.5rem] border-b shadow-gray-600 sm:px-5 px-0">
+    <div className="relative flex items-center justify-center min-h-[4.5rem] border-b shadow-gray-600 sm:px-5 px-0">
       <div className="flex items-center lg:justify-between justify-center w-full sm:w-[52rem]">
         {/* Full reload on purpose: animations run on raw timers that must not outlive the page. */}
         <a
@@ -98,6 +104,7 @@ export function Nav({
             label="Maze"
             value={maze}
             options={MAZES}
+            isDisabled={isDisabled}
             onChange={(e) => {
               handleGenerateMaze(e.target.value as MazeType);
             }}
@@ -106,6 +113,7 @@ export function Nav({
             label="Graph"
             value={algorithm}
             options={PATHFINDING_ALGORITHMS}
+            isDisabled={isDisabled}
             onChange={(e) => {
               setAlgorithm(e.target.value as AlgorithmType);
             }}
@@ -114,6 +122,7 @@ export function Nav({
             label="Speed"
             value={speed}
             options={SPEEDS}
+            isDisabled={isDisabled}
             onChange={(e) => {
               setSpeed(parseInt(e.target.value) as SpeedType);
             }}
@@ -125,6 +134,11 @@ export function Nav({
           />
         </div>
       </div>
+      {noPath && (
+        <p className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-sm text-red-400">
+          No path found: the end tile is walled off.
+        </p>
+      )}
     </div>
   );
 }

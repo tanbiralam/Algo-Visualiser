@@ -1,5 +1,5 @@
 import { getUntraversedNeighbors } from "../../../utils/getUntraversedNeighbors";
-import { isEqual } from "../../../utils/helpers";
+import { buildPath, isEqual } from "../../../utils/helpers";
 import { isInQueue } from "../../../utils/isInQueue";
 import { GridType, TileType } from "../../../utils/types";
 
@@ -30,13 +30,7 @@ export const bfs = (grid: GridType, startTile: TileType, endTile: TileType) => {
     }
   }
 
-  const path = [];
-  let tile = grid[endTile.row][endTile.col];
-  while (tile !== null) {
-    tile.isPath = true;
-    path.unshift(tile);
-    tile = tile.parent!;
-  }
+  const path = buildPath(grid, endTile, traversedTiles);
 
   return { traversedTiles, path };
 };

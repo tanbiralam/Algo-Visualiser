@@ -43,6 +43,24 @@ export const createNewGrid = (grid: GridType, row: number, col: number) => {
   return newGrid;
 };
 
+export const buildPath = (
+  grid: GridType,
+  endTile: TileType,
+  traversedTiles: TileType[]
+) => {
+  const path: TileType[] = [];
+  const last = traversedTiles[traversedTiles.length - 1];
+  if (!last || !isEqual(last, endTile)) return path; // end unreachable
+
+  let current: TileType | null = grid[endTile.row][endTile.col];
+  while (current) {
+    current.isPath = true;
+    path.unshift(current);
+    current = current.parent;
+  }
+  return path;
+};
+
 export const isEqual = (a: TileType, b: TileType) => {
   return a.row === b.row && a.col === b.col;
 };

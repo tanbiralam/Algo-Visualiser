@@ -1,5 +1,5 @@
 import { getUntraversedNeighbors } from "../../../utils/getUntraversedNeighbors";
-import { dropFromQueue, isEqual } from "../../../utils/helpers";
+import { buildPath, dropFromQueue, isEqual } from "../../../utils/helpers";
 import { GridType, TileType } from "../../../utils/types";
 
 export const dijkstra = (
@@ -34,12 +34,6 @@ export const dijkstra = (
     }
   }
 
-  const path = [];
-  let current = grid[endTile.row][endTile.col];
-  while (current !== null) {
-    current.isPath = true;
-    path.unshift(current);
-    current = current.parent!;
-  }
+  const path = buildPath(grid, endTile, traversedTiles);
   return { traversedTiles, path };
 };
