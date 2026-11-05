@@ -3,6 +3,7 @@ import { createRandom, randomInt } from "@/lib/random";
 import { SORTING_ALGORITHMS } from "@/sorting/algorithms";
 import { replaySort } from "@/sorting/replay";
 import { generateInput, INPUT_OPTIONS } from "@/sorting/input";
+import { parseSortingParams } from "@/sorting/share";
 
 const rand = createRandom(42);
 const inputs: number[][] = [
@@ -88,4 +89,26 @@ describe("radix sort", () => {
 it("pseudocode lines fit the side panel", () => {
   for (const { pseudocode } of Object.values(SORTING_ALGORITHMS))
     for (const line of pseudocode) expect(line.length).toBeLessThanOrEqual(48);
+});
+
+describe("parseSortingParams", () => {
+  it("reads valid params", () => {
+    expect(parseSortingParams("?algo=heap&vs=radix&input=reversed&size=120&seed=42")).toEqual({
+      algorithm: "heap",
+      rival: "radix",
+      preset: "reversed",
+      size: 120,
+      seed: 42,
+    });
+  });
+
+  it("ignores invalid values", () => {
+    expect(parseSortingParams("?algo=bogo&vs=1&input=x&size=5000&seed=-3")).toEqual({
+      algorithm: undefined,
+      rival: undefined,
+      preset: undefined,
+      size: undefined,
+      seed: undefined,
+    });
+  });
 });

@@ -6,6 +6,7 @@ import { BsShuffle } from "react-icons/bs";
 import { PlayerControls } from "@/components/PlayerControls";
 import { Pseudocode } from "@/components/Pseudocode";
 import { Select } from "@/components/Select";
+import { ShareButton } from "@/components/ShareButton";
 import { Stats } from "@/components/Stats";
 import { Button, Pane, Panel, VisualiserShell } from "@/components/VisualiserShell";
 import { usePlayer } from "@/engine/usePlayer";
@@ -14,6 +15,7 @@ import { SORTING_ALGORITHMS, SORTING_OPTIONS } from "@/sorting/algorithms";
 import { Bars } from "@/sorting/Bars";
 import { generateInput, INPUT_OPTIONS, InputPreset } from "@/sorting/input";
 import { replaySort } from "@/sorting/replay";
+import { MAX_SIZE, MIN_SIZE, parseSortingParams } from "@/sorting/share";
 import { SortAlgorithm } from "@/sorting/types";
 
 const COMPARE_OPTIONS = [{ value: "none" as const, label: "Nothing" }, ...SORTING_OPTIONS];
@@ -23,9 +25,17 @@ export default function SortingPage() {
   const [rival, setRival] = useState<SortAlgorithm | "none">("none");
   const [preset, setPreset] = useState<InputPreset>("random");
   const [size, setSize] = useState(80);
-  // Fixed first seed keeps server and client renders identical; randomise after mount.
+  // Fixed first seed keeps server and client renders identical; after mount, apply
+  // a shared link's settings or pick a random seed.
   const [seed, setSeed] = useState(1);
-  useEffect(() => setSeed(newSeed()), []);
+  useEffect(() => {
+    const shared = parseSortingParams(window.location.search);
+    if (shared.algorithm) setAlgorithm(shared.algorithm);
+    if (shared.rival) setRival(shared.rival);
+    if (shared.preset) setPreset(shared.preset);
+    if (shared.size) setSize(shared.size);
+    setSeed(shared.seed ?? newSeed());
+  }, []);
 
   const input = useMemo(() => generateInput(preset, size, createRandom(seed)), [preset, size, seed]);
   const runs = useMemo(
@@ -56,8 +66,8 @@ export default function SortingPage() {
             Size: {size}
             <input
               type="range"
-              min={8}
-              max={200}
+              min={MIN_SIZE}
+              max={MAX_SIZE}
               value={size}
               onChange={(e) => setSize(Number(e.target.value))}
               className="h-9 w-32 accent-purple-500"
@@ -66,6 +76,15 @@ export default function SortingPage() {
           <Button onClick={() => setSeed(newSeed())}>
             <BsShuffle /> New array
           </Button>
+          <ShareButton
+            getParams={() => ({
+              algo: algorithm,
+              vs: rival === "none" ? undefined : rival,
+              input: preset,
+              size,
+              seed,
+            })}
+          />
         </>
       }
       side={

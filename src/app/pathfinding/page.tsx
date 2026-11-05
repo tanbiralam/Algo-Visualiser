@@ -6,6 +6,7 @@ import { PlayerControls } from "@/components/PlayerControls";
 import { Pseudocode } from "@/components/Pseudocode";
 import { Stats } from "@/components/Stats";
 import { Select } from "@/components/Select";
+import { ShareButton } from "@/components/ShareButton";
 import { Button, Pane, Panel, VisualiserShell } from "@/components/VisualiserShell";
 import { usePlayer } from "@/engine/usePlayer";
 import { formatNumber, useHydrated } from "@/lib/format";
@@ -13,6 +14,7 @@ import { createRandom, newSeed } from "@/lib/random";
 import { Endpoint, Grid } from "@/pathfinding/Grid";
 import { applyOps, emptyBoard, MAZE_GENERATORS, snapToCell, WallOp } from "@/pathfinding/mazes";
 import { replaySearch, runSearch } from "@/pathfinding/search";
+import { encodeBoard, encodePoint, parsePathfindingParams } from "@/pathfinding/share";
 import {
   ALGORITHM_OPTIONS,
   DEFAULT_END,
@@ -52,6 +54,16 @@ export default function PathfindingPage() {
   const [end, setEnd] = useState<Point>(DEFAULT_END);
   const [mazeOps, setMazeOps] = useState<WallOp[] | null>(null);
   const drawingMaze = mazeOps !== null;
+
+  // Apply a shared link's settings after mount (the server render always uses defaults).
+  useEffect(() => {
+    const shared = parsePathfindingParams(window.location.search);
+    if (shared.algorithm) setAlgorithm(shared.algorithm);
+    if (shared.rival) setRival(shared.rival);
+    if (shared.start) setStart(shared.start);
+    if (shared.end) setEnd(shared.end);
+    if (shared.board) setBoard(shared.board);
+  }, []);
 
   // Animate maze generation a chunk of wall changes per frame.
   useEffect(() => {
@@ -126,6 +138,15 @@ export default function PathfindingPage() {
           <Button onClick={() => generateMaze("NONE")} disabled={locked}>
             <BsEraser /> Clear board
           </Button>
+          <ShareButton
+            getParams={() => ({
+              algo: algorithm,
+              vs: rival === "none" ? undefined : rival,
+              start: encodePoint(start),
+              end: encodePoint(end),
+              board: encodeBoard(board),
+            })}
+          />
         </>
       }
       side={
