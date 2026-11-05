@@ -9,7 +9,6 @@ import {
   generateAnimationArray,
   sortingAlgorithmsData,
 } from "@/sorting/lib/utils";
-import Link from "next/link";
 import { FaPlayCircle } from "react-icons/fa";
 import { RxReset } from "react-icons/rx";
 
@@ -52,12 +51,13 @@ export default function Home() {
           className="flex max-w-[1020px] w-full flex-col lg:px-0 px-4"
         >
           <div className="h-[66px] relative flex items-center justify-between w-full">
-            <Link
+            {/* Full reload on purpose: animations run on raw timers that must not outlive the page. */}
+            <a
               href="/"
               className="text-gray-300 text-2xl font-light hidden md:flex hover:text-white"
             >
               Sorting Visualiser
-            </Link>
+            </a>
             <div className="flex items-center justify-center gap-4">
               <Slider
                 isDisabled={isSorting}

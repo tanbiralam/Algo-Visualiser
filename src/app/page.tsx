@@ -7,6 +7,12 @@ const visualisers = [
     description:
       "Watch Bubble, Insertion, Selection, Merge and Quick sort rearrange an array step by step.",
   },
+  {
+    href: "/pathfinding",
+    title: "Pathfinding",
+    description:
+      "Draw walls or generate a maze, then watch BFS, DFS, Dijkstra and A* search for the shortest path.",
+  },
 ];
 
 export default function Home() {
