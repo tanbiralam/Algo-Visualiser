@@ -49,7 +49,8 @@ function tileClass(
     if (status === PATH && rival === PATH) return OVERLAY_BOTH_PATHS_STYLE;
     if (rival === PATH) return OVERLAY_RIVAL_PATH_STYLE;
     if (status === PATH) return weighted ? WEIGHT_PATH_TILE_STYLE : PATH_TILE_STYLE;
-    const fill = status === VISITED ? (weighted ? "bg-ai/60" : "bg-ai/25") : weighted ? WEIGHT_TILE_STYLE : TILE_STYLE;
+    const fill =
+      status === VISITED ? (weighted ? "bg-wash-deep" : "bg-wash") : weighted ? WEIGHT_TILE_STYLE : TILE_STYLE;
     return rival === VISITED ? `${fill} ${OVERLAY_RIVAL_VISITED_STYLE}` : fill;
   }
   if (status === PATH) return weighted ? WEIGHT_PATH_TILE_STYLE : PATH_TILE_STYLE;

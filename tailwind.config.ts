@@ -17,6 +17,9 @@ const config: Config = {
         ai: token("ai"),
         gold: token("gold"),
         moss: token("moss"),
+        // Visited tiles: an indigo ink wash, deeper on weight tiles.
+        wash: token("wash"),
+        "wash-deep": token("wash-deep"),
       },
       fontFamily: {
         display: ["var(--font-display)", "Georgia", "serif"],

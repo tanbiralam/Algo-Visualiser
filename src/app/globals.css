@@ -15,6 +15,8 @@
   --c-ai: 46 74 107;
   --c-gold: 169 132 47;
   --c-moss: 94 115 72;
+  --c-wash: 190 207 229;
+  --c-wash-deep: 128 155 191;
   color-scheme: light;
 }
 
@@ -30,6 +32,8 @@
     --c-ai: 127 160 200;
     --c-gold: 209 170 90;
     --c-moss: 155 176 127;
+    --c-wash: 38 56 84;
+    --c-wash-deep: 66 94 133;
     color-scheme: dark;
   }
 }
@@ -45,6 +49,8 @@
   --c-ai: 127 160 200;
   --c-gold: 209 170 90;
   --c-moss: 155 176 127;
+  --c-wash: 38 56 84;
+  --c-wash-deep: 66 94 133;
   color-scheme: dark;
 }
 

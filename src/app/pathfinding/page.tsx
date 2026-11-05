@@ -43,7 +43,7 @@ const LEGEND = [
   ["bg-shu", "End"],
   ["bg-ink", "Wall"],
   ["bg-ink/20", `Weight: costs ${WEIGHT_COST} to enter`],
-  ["bg-ai/25", "Visited"],
+  ["bg-wash", "Visited"],
   ["bg-gold", "Path"],
 ] as const;
 
@@ -54,10 +54,11 @@ const VIEW_OPTIONS = [
 
 const overlayLegend = (a: string, b: string) =>
   [
-    ["bg-ai/25", `${a} visited`],
+    ["bg-wash", `${a} visited`],
     ["bg-gold", `${a} path`],
     ["shadow-[inset_0_0_0_1.5px_rgb(var(--c-shu)/0.75)]", `${b} visited`],
     ["bg-shu", `${b} path`],
+    ["bg-gold shadow-[inset_0_0_0_2px_rgb(var(--c-shu))]", "Both paths"],
   ] as const;
 
 export default function PathfindingPage() {
