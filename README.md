@@ -19,21 +19,21 @@ An interactive web app for seeing how classic algorithms work, built with Next.j
 
 ## Getting started
 
-Requires Node.js 18.17 or newer.
+Requires Node.js 18.17 or newer and [pnpm](https://pnpm.io/installation).
 
 ```bash
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 
 Then open [http://localhost:3000](http://localhost:3000).
 
-| Command         | What it does                 |
-| --------------- | ---------------------------- |
-| `npm run dev`   | Start the dev server         |
-| `npm run build` | Production build             |
-| `npm start`     | Serve the production build   |
-| `npm run lint`  | Run ESLint                   |
+| Command      | What it does               |
+| ------------ | -------------------------- |
+| `pnpm dev`   | Start the dev server       |
+| `pnpm build` | Production build           |
+| `pnpm start` | Serve the production build |
+| `pnpm lint`  | Run ESLint                 |
 
 ## Project structure
 
