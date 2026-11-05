@@ -9,6 +9,8 @@ import { Select } from "@/components/Select";
 import { ShareButton } from "@/components/ShareButton";
 import { Stats } from "@/components/Stats";
 import { Button, Pane, Panel, VisualiserShell } from "@/components/VisualiserShell";
+import { LearnCard, LearnIntro, SideTabs } from "@/components/LearnCard";
+import { SORTING_CARDS } from "@/learn/cards";
 import { usePlayer } from "@/engine/usePlayer";
 import { createRandom, newSeed } from "@/lib/random";
 import { SORTING_ALGORITHMS, SORTING_OPTIONS } from "@/sorting/algorithms";
@@ -43,14 +45,15 @@ export default function SortingPage() {
       (rival === "none" ? [algorithm] : [algorithm, rival]).map((key) => {
         const info = SORTING_ALGORITHMS[key];
         const steps = info.run(input);
-        return { info, steps, totals: replaySort(input, steps, steps.length) };
+        return { info, card: SORTING_CARDS[key], steps, totals: replaySort(input, steps, steps.length) };
       }),
-    [algorithm, rival, input]
+    [algorithm, rival, input],
   );
+  const [tab, setTab] = useState<"watch" | "learn">("watch");
   const player = usePlayer(Math.max(...runs.map((r) => r.steps.length)), runs);
   const states = useMemo(
     () => runs.map((r) => replaySort(input, r.steps, Math.min(player.index, r.steps.length))),
-    [input, runs, player.index]
+    [input, runs, player.index],
   );
   const comparing = runs.length > 1;
 
@@ -90,47 +93,66 @@ export default function SortingPage() {
         </>
       }
       side={
-        <>
-          {runs.map(({ info, totals }, k) => (
-            <Panel key={k} title={comparing ? info.label : "Live stats"}>
-              <div className="space-y-3">
-                <Stats
-                  stats={[
-                    { label: "Comparisons", value: states[k].comparisons, total: totals.comparisons },
-                    { label: "Swaps", value: states[k].swaps, total: totals.swaps },
-                    { label: "Writes", value: states[k].writes, total: totals.writes },
-                  ]}
-                />
-                <Pseudocode lines={info.pseudocode} trace={states[k].last} />
-              </div>
-            </Panel>
+        <SideTabs
+          tab={tab}
+          onTab={setTab}
+          learn={runs.map(({ card }) => (
+            <LearnCard key={card.name} card={card} />
           ))}
-          {!comparing && (
+          watch={
             <>
-              <Panel title={runs[0].info.label}>
-                <p className="leading-relaxed text-muted">{runs[0].info.description}</p>
-              </Panel>
-              <Panel title="Time complexity">
-                <dl className="grid grid-cols-2 gap-y-1">
-                  <dt className="text-muted">Best</dt>
-                  <dd className="font-mono">{runs[0].info.best}</dd>
-                  <dt className="text-muted">Average</dt>
-                  <dd className="font-mono">{runs[0].info.average}</dd>
-                  <dt className="text-muted">Worst</dt>
-                  <dd className="font-mono">{runs[0].info.worst}</dd>
-                </dl>
+              {!comparing && <LearnIntro card={runs[0].card} onMore={() => setTab("learn")} />}
+              {runs.map(({ info, totals }, k) => (
+                <Panel key={k} title={comparing ? info.label : "Live stats"}>
+                  <div className="space-y-3">
+                    <Stats
+                      stats={[
+                        { label: "Comparisons", value: states[k].comparisons, total: totals.comparisons },
+                        { label: "Swaps", value: states[k].swaps, total: totals.swaps },
+                        { label: "Writes", value: states[k].writes, total: totals.writes },
+                      ]}
+                    />
+                    <Pseudocode lines={info.pseudocode} trace={states[k].last} />
+                  </div>
+                </Panel>
+              ))}
+              {!comparing && (
+                <>
+                  <Panel title="Time complexity">
+                    <dl className="grid grid-cols-2 gap-y-1">
+                      <dt className="text-muted">Best</dt>
+                      <dd className="font-mono">{runs[0].info.best}</dd>
+                      <dt className="text-muted">Average</dt>
+                      <dd className="font-mono">{runs[0].info.average}</dd>
+                      <dt className="text-muted">Worst</dt>
+                      <dd className="font-mono">{runs[0].info.worst}</dd>
+                    </dl>
+                  </Panel>
+                </>
+              )}
+              <Panel title="Legend">
+                <ul className="space-y-1.5 text-muted">
+                  <li>
+                    <span className="mr-2 inline-block h-3 w-3 rounded-sm bg-shu align-[-1px]" />
+                    Comparing
+                  </li>
+                  <li>
+                    <span className="mr-2 inline-block h-3 w-3 rounded-sm bg-ai align-[-1px]" />
+                    Reading a digit (radix)
+                  </li>
+                  <li>
+                    <span className="mr-2 inline-block h-3 w-3 -translate-y-0.5 rounded-sm bg-shu align-[-1px]" />
+                    Swap or write (lifted)
+                  </li>
+                  <li>
+                    <span className="mr-2 inline-block h-3 w-3 rounded-sm bg-gold align-[-1px]" />
+                    Sorted
+                  </li>
+                </ul>
               </Panel>
             </>
-          )}
-          <Panel title="Legend">
-            <ul className="space-y-1.5 text-muted">
-              <li><span className="mr-2 inline-block h-3 w-3 rounded-sm bg-shu align-[-1px]" />Comparing</li>
-              <li><span className="mr-2 inline-block h-3 w-3 rounded-sm bg-ai align-[-1px]" />Reading a digit (radix)</li>
-              <li><span className="mr-2 inline-block h-3 w-3 -translate-y-0.5 rounded-sm bg-shu align-[-1px]" />Swap or write (lifted)</li>
-              <li><span className="mr-2 inline-block h-3 w-3 rounded-sm bg-gold align-[-1px]" />Sorted</li>
-            </ul>
-          </Panel>
-        </>
+          }
+        />
       }
       footer={<PlayerControls player={player} />}
     >

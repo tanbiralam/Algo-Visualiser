@@ -8,6 +8,8 @@ import { Stats } from "@/components/Stats";
 import { Select } from "@/components/Select";
 import { ShareButton } from "@/components/ShareButton";
 import { Button, Pane, Panel, VisualiserShell } from "@/components/VisualiserShell";
+import { LearnCard, LearnIntro, SideTabs } from "@/components/LearnCard";
+import { PATHFINDING_CARDS } from "@/learn/cards";
 import { usePlayer } from "@/engine/usePlayer";
 import { formatNumber, useHydrated } from "@/lib/format";
 import { createRandom, newSeed } from "@/lib/random";
@@ -86,19 +88,21 @@ export default function PathfindingPage() {
         ? []
         : (rival === "none" ? [algorithm] : [algorithm, rival]).map((key) => ({
             info: PATHFINDING_ALGORITHMS[key],
+            card: PATHFINDING_CARDS[key],
             search: runSearch(key, board, start, end),
           })),
-    [algorithm, rival, board, start, end, drawingMaze]
+    [algorithm, rival, board, start, end, drawingMaze],
   );
   const player = usePlayer(Math.max(0, ...runs.map((r) => r.search.steps.length)), runs);
   const statuses = useMemo(
     () => runs.map((r) => replaySearch(r.search.steps, Math.min(player.index, r.search.steps.length))),
-    [runs, player.index]
+    [runs, player.index],
   );
   const comparing = rival !== "none";
   const hydrated = useHydrated(); // search time differs per run, so skip it during SSR
-  const info = PATHFINDING_ALGORITHMS[algorithm];
   const locked = drawingMaze || player.playing;
+  const [tab, setTab] = useState<"watch" | "learn">("watch");
+  const cards = (rival === "none" ? [algorithm] : [algorithm, rival]).map((key) => PATHFINDING_CARDS[key]);
 
   const generateMaze = (value: MazeType) => {
     setMaze(value);
@@ -132,7 +136,13 @@ export default function PathfindingPage() {
       controls={
         <>
           <Select label="Maze" value={maze} options={MAZE_OPTIONS} onChange={generateMaze} disabled={locked} />
-          <Select label="Algorithm" value={algorithm} options={ALGORITHM_OPTIONS} onChange={setAlgorithm} disabled={locked} />
+          <Select
+            label="Algorithm"
+            value={algorithm}
+            options={ALGORITHM_OPTIONS}
+            onChange={setAlgorithm}
+            disabled={locked}
+          />
           <Select label="Compare with" value={rival} options={COMPARE_OPTIONS} onChange={setRival} disabled={locked} />
           <Select label="Brush" value={brush} options={BRUSH_OPTIONS} onChange={setBrush} disabled={locked} />
           <Button onClick={() => generateMaze("NONE")} disabled={locked}>
@@ -150,52 +160,58 @@ export default function PathfindingPage() {
         </>
       }
       side={
-        <>
-          {runs.map(({ info: runInfo, search }, k) => (
-            <Panel key={k} title={comparing ? runInfo.label : "Live stats"}>
-              <div className="space-y-3">
-                <Stats
-                  stats={[
-                    { label: "Visited", value: Math.min(player.index, search.visited), total: search.visited },
-                    {
-                      label: "Path length",
-                      value: Math.max(0, Math.min(player.index, search.steps.length) - search.visited),
-                      total: search.found ? search.pathLength : "no path",
-                    },
-                    { label: "Path cost", value: search.found ? search.cost : "–" },
-                    { label: "Search time", value: hydrated ? `${search.ms.toFixed(2)} ms` : "–" },
-                  ]}
-                />
-                <Pseudocode
-                  lines={runInfo.pseudocode}
-                  trace={player.index > 0 ? search.steps[Math.min(player.index, search.steps.length) - 1] : undefined}
-                />
-              </div>
-            </Panel>
+        <SideTabs
+          tab={tab}
+          onTab={setTab}
+          learn={cards.map((card) => (
+            <LearnCard key={card.name} card={card} />
           ))}
-          {!comparing && <Panel title={info.label}>
-            <p className="leading-relaxed text-muted">{info.description}</p>
-            <p className="mt-2 text-muted">
-              Guarantees: <span className="text-ink">{info.guarantee}</span>
-            </p>
-          </Panel>}
-          <Panel title="How to use">
-            <p className="leading-relaxed text-muted">
-              Click or touch and drag to paint walls or weights (pick the brush), or generate a maze. Drag the
-              start and end tiles to move them. Press play (space) to run, and ← / → to step.
-            </p>
-          </Panel>
-          <Panel title="Legend">
-            <ul className="space-y-1.5 text-muted">
-              {LEGEND.map(([color, label]) => (
-                <li key={label}>
-                  <span className={`mr-2 inline-block h-3 w-3 rounded-sm align-[-1px] ${color}`} />
-                  {label}
-                </li>
+          watch={
+            <>
+              {!comparing && <LearnIntro card={cards[0]} onMore={() => setTab("learn")} />}
+              {runs.map(({ info: runInfo, search }, k) => (
+                <Panel key={k} title={comparing ? runInfo.label : "Live stats"}>
+                  <div className="space-y-3">
+                    <Stats
+                      stats={[
+                        { label: "Visited", value: Math.min(player.index, search.visited), total: search.visited },
+                        {
+                          label: "Path length",
+                          value: Math.max(0, Math.min(player.index, search.steps.length) - search.visited),
+                          total: search.found ? search.pathLength : "no path",
+                        },
+                        { label: "Path cost", value: search.found ? search.cost : "–" },
+                        { label: "Search time", value: hydrated ? `${search.ms.toFixed(2)} ms` : "–" },
+                      ]}
+                    />
+                    <Pseudocode
+                      lines={runInfo.pseudocode}
+                      trace={
+                        player.index > 0 ? search.steps[Math.min(player.index, search.steps.length) - 1] : undefined
+                      }
+                    />
+                  </div>
+                </Panel>
               ))}
-            </ul>
-          </Panel>
-        </>
+              <Panel title="How to use">
+                <p className="leading-relaxed text-muted">
+                  Click or touch and drag to paint walls or weights (pick the brush), or generate a maze. Drag the start
+                  and end tiles to move them. Press play (space) to run, and ← / → to step.
+                </p>
+              </Panel>
+              <Panel title="Legend">
+                <ul className="space-y-1.5 text-muted">
+                  {LEGEND.map(([color, label]) => (
+                    <li key={label}>
+                      <span className={`mr-2 inline-block h-3 w-3 rounded-sm align-[-1px] ${color}`} />
+                      {label}
+                    </li>
+                  ))}
+                </ul>
+              </Panel>
+            </>
+          }
+        />
       }
       footer={<PlayerControls player={player} disabled={drawingMaze} />}
     >
@@ -207,7 +223,14 @@ export default function PathfindingPage() {
             <Pane
               key={k}
               label={comparing && run ? run.info.label : undefined}
-              status={run && (finished ? (run.search.found ? "reached the end" : "no path") : `${formatNumber(run.search.visited)} visits`)}
+              status={
+                run &&
+                (finished
+                  ? run.search.found
+                    ? "reached the end"
+                    : "no path"
+                  : `${formatNumber(run.search.visited)} visits`)
+              }
             >
               <Grid
                 board={board}
