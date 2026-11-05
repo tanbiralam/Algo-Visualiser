@@ -1,4 +1,4 @@
-import { AlgorithmSelectType, MazeSelectType, SpeedSelectType } from "./types";
+import { AlgorithmType, MazeType } from "./types";
 
 export const MAX_ROWS = 39;
 export const MAX_COLS = 49;
@@ -27,31 +27,49 @@ export const END_TILE_CONFIGURATION = {
 };
 
 export const TILE_STYLE =
-  "lg:w-[17px] md:w-[15px] xs:w-[8px] w-[7px] lg:h-[17px] md:h-[15px] xs:h-[8px] h-[7px] border-t border-r border-sky-200";
-export const TRAVERSED_TILE_STYLE = TILE_STYLE + " bg-cyan-500";
+  "w-[7px] h-[7px] sm:w-[11px] sm:h-[11px] md:w-[13px] md:h-[13px] lg:w-[14px] lg:h-[14px] 2xl:w-[17px] 2xl:h-[17px] border-t border-r border-sky-200/40";
+export const TRAVERSED_TILE_STYLE = TILE_STYLE + " bg-cyan-500 animate-traversed";
 export const START_TILE_STYLE = TILE_STYLE + " bg-green-500";
 export const END_TILE_STYLE = TILE_STYLE + " bg-red-600";
-export const WALL_TILE_STYLE = TILE_STYLE + " bg-gray-200";
-export const PATH_TILE_STYLE = TILE_STYLE + " bg-green-600";
+export const WALL_TILE_STYLE = TILE_STYLE + " bg-gray-200 animate-wall";
+export const PATH_TILE_STYLE = TILE_STYLE + " bg-amber-300 animate-path";
 
-export const MAZES: MazeSelectType[] = [
-  { name: "No Maze", value: "NONE" },
-  { name: "Binary Tree", value: "BINARY_TREE" },
-  { name: "Recursive Division", value: "RECURSIVE_DIVISION" },
+export const MAZE_OPTIONS: { value: MazeType; label: string }[] = [
+  { value: "NONE", label: "No maze" },
+  { value: "BINARY_TREE", label: "Binary Tree" },
+  { value: "RECURSIVE_DIVISION", label: "Recursive Division" },
 ];
 
-export const PATHFINDING_ALGORITHMS: AlgorithmSelectType[] = [
-  { name: "Dijkstra", value: "DIJKSTRA" },
-  { name: "A-Star", value: "A_STAR" },
-  { name: "Breath First Search", value: "BFS" },
-  { name: "Depth First Search", value: "DFS" },
-];
+export const PATHFINDING_ALGORITHMS: Record<
+  AlgorithmType,
+  { label: string; description: string; shortest: boolean }
+> = {
+  BFS: {
+    label: "Breadth-First Search",
+    description:
+      "Explores the grid in rings of equal distance from the start using a queue. On an unweighted grid the first time it reaches the end is along a shortest path.",
+    shortest: true,
+  },
+  DFS: {
+    label: "Depth-First Search",
+    description:
+      "Follows one direction as far as possible using a stack before backtracking. Finds a path if one exists, but usually not the shortest.",
+    shortest: false,
+  },
+  DIJKSTRA: {
+    label: "Dijkstra",
+    description:
+      "Always expands the closest unvisited tile from a priority queue. Guarantees a shortest path, and also works when moves have different costs.",
+    shortest: true,
+  },
+  A_STAR: {
+    label: "A* Search",
+    description:
+      "Like Dijkstra, but ranks tiles by distance so far plus a Manhattan-distance estimate to the end, so it heads toward the goal and visits far fewer tiles.",
+    shortest: true,
+  },
+};
 
-export const SPEEDS: SpeedSelectType[] = [
-  { name: "Slow", value: 2 },
-  { name: "Medium", value: 1 },
-  { name: "Fast", value: 0.5 },
-];
-
-export const SLEEP_TIME = 8;
-export const EXTENDED_SLEEP_TIME = 30;
+export const ALGORITHM_OPTIONS = (Object.keys(PATHFINDING_ALGORITHMS) as AlgorithmType[]).map(
+  (value) => ({ value, label: PATHFINDING_ALGORITHMS[value].label })
+);

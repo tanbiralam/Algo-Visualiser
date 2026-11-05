@@ -27,22 +27,6 @@ export const createGrid = (startTile: TileType, endTile: TileType) => {
   return grid;
 };
 
-export const checkIfStartOrEnd = (row: number, col: number) => {
-  return (
-    (row === 1 && col === 1) || (row === MAX_ROWS - 2 && col === MAX_COLS - 2)
-  );
-};
-
-export const createNewGrid = (grid: GridType, row: number, col: number) => {
-  const newGrid = grid.slice();
-  const newTile = {
-    ...newGrid[row][col],
-    isWall: !newGrid[row][col].isWall,
-  };
-  newGrid[row][col] = newTile;
-  return newGrid;
-};
-
 export const buildPath = (
   grid: GridType,
   endTile: TileType,
@@ -63,20 +47,6 @@ export const buildPath = (
 
 export const isEqual = (a: TileType, b: TileType) => {
   return a.row === b.row && a.col === b.col;
-};
-
-export const isRowColEqual = (row: number, col: number, tile: TileType) => {
-  return row === tile.row && col === tile.col;
-};
-
-export const sleep = (ms: number) => {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-};
-
-export const getRandInt = (min: number, max: number) => {
-  min = Math.ceil(min);
-  max = Math.ceil(max);
-  return Math.floor(Math.random() * (max - min) + min);
 };
 
 export const checkStack = (tile: TileType, stack: TileType[]) => {

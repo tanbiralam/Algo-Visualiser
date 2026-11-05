@@ -1,14 +1,9 @@
 import type { Metadata } from "next";
-import { SortingAlgorithmProvider } from "@/sorting/context/Visualizer";
 
 export const metadata: Metadata = {
   title: "Sorting Visualiser | Algo Visualiser",
 };
 
-export default function SortingLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return <SortingAlgorithmProvider>{children}</SortingAlgorithmProvider>;
+export default function SortingLayout({ children }: { children: React.ReactNode }) {
+  return children;
 }

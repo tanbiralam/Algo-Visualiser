@@ -12,3 +12,5 @@ export function createRandom(seed: number) {
 
 export const randomInt = (rand: () => number, min: number, max: number) =>
   Math.floor(rand() * (max - min + 1)) + min;
+
+export const newSeed = () => Math.floor(Math.random() * 2 ** 31);
