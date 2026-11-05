@@ -32,7 +32,7 @@ Every algorithm runs once up front and records each step. The page then renders 
 
 ## Getting started
 
-Requires Node.js 18.17 or newer and [pnpm](https://pnpm.io/installation).
+Requires Node.js 26 and [pnpm](https://pnpm.io/installation).
 
 ```bash
 pnpm install
